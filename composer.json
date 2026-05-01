@@ -10,9 +10,15 @@
         }
     ],
     "require": {
-        "php": "^8.1",
-        "filament/filament": "^3.0",
-        "nativephp/mobile": "^0.1"
+        "php": "^8.2",
+        "filament/filament": "^3.3",
+        "filament/spatie-laravel-media-library-plugin": "^3.3",
+        "midtrans/midtrans-php": "^2.6",
+        "spatie/laravel-package-tools": "^1.16",
+        "spatie/laravel-csp": "^3.0",
+        "stichoza/google-translate-php": "^5.0",
+        "nativephp/laravel": "^1.3",
+        "nativephp/mobile": "^3.1"
     },
     "autoload": {
         "psr-4": {
@@ -25,5 +31,7 @@
                 "Aanugerah\\WeddingPro\\WeddingProServiceProvider"
             ]
         }
-    }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }

@@ -1,0 +1,266 @@
+<?php
+
+namespace Aanugerah\WeddingPro\Models;
+
+use Aanugerah\WeddingPro\Traits\BelongsToBrand;
+use Filament\Facades\Filament;
+use Aanugerah\WeddingPro\Models\WeddingOrganizer;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
+
+/**
+ * @property int $id
+ * @property int $wedding_organizer_id
+ * @property int|null $category_id
+ * @property string $name
+ * @property string $slug
+ * @property string|null $description
+ * @property float $price
+ * @property float|null $discount_price
+ * @property bool $is_featured
+ * @property array<array-key, mixed>|null $features
+ * @property string|null $theme
+ * @property string|null $color
+ * @property int|null $min_capacity
+ * @property int|null $max_capacity
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Category|null $category
+ * @property-read mixed $image_url
+ * @property-read bool $is_wishlisted
+ * @property-read string|null $video_url
+ * @property-read MediaCollection<int, Media> $media
+ * @property-read int|null $media_count
+ * @property-read Collection<int, Order> $orders
+ * @property-read int|null $orders_count
+ * @property-read Collection<int, Review> $reviews
+ * @property-read int|null $reviews_count
+ * @property-read WeddingOrganizer $weddingOrganizer
+ * @property-read Collection<int, Wishlist> $wishlists
+ * @property-read int|null $wishlists_count
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Package newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Package newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Package query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Package whereCategoryId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Package whereColor($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Package whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Package whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Package whereDiscountPrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Package whereFeatures($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Package whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Package whereIsFeatured($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Package whereMaxCapacity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Package whereMinCapacity($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Package whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Package wherePrice($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Package whereSlug($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Package whereTheme($value)
+ * @method static \Aanugerah\WeddingPro\Models\Package|null find(mixed $id, array|string $columns = ['*'])
+ * @method static \Aanugerah\WeddingPro\Models\Package findOrFail(mixed $id, array|string $columns = ['*'])
+ * @method static \Aanugerah\WeddingPro\Models\Package|null first(array|string $columns = ['*'])
+ * @method static \Aanugerah\WeddingPro\Models\Package firstOrFail(array|string $columns = ['*'])
+ * @method static \Illuminate\Database\Eloquent\Collection<int, \Aanugerah\WeddingPro\Models\Package> get(array|string $columns = ['*'])
+ *
+ * @property int $weddingOrganizerId
+ * @property int|null $categoryId
+ * @property numeric|null $discountPrice
+ * @property bool $isFeatured
+ * @property int|null $minCapacity
+ * @property int|null $maxCapacity
+ * @property Carbon|null $createdAt
+ * @property Carbon|null $updatedAt
+ * @property-read mixed $imageUrl
+ * @property-read bool $isWishlisted
+ * @property-read string|null $videoUrl
+ * @property-read int|null $mediaCount
+ * @property-read bool|null $mediaExists
+ * @property-read int|null $ordersCount
+ * @property-read bool|null $ordersExists
+ * @property-read int|null $reviewsCount
+ * @property-read bool|null $reviewsExists
+ * @property-read int|null $wishlistsCount
+ * @property-read bool|null $wishlistsExists
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|\Aanugerah\WeddingPro\Models\Package whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|\Aanugerah\WeddingPro\Models\Package whereWeddingOrganizerId($value)
+ *
+ * @mixin \Eloquent
+ */
+class Package extends Model implements HasMedia
+{
+    use BelongsToBrand;
+    use InteractsWithMedia;
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('package_image')->singleFile();
+        $this->addMediaCollection('videos');
+    }
+
+    protected $fillable = [
+        'wedding_organizer_id',
+        'category_id',
+        'name',
+        'slug',
+        'description',
+        'price',
+        'discount_price',
+        'is_featured',
+        'features',
+        'theme',
+        'color',
+        'min_capacity',
+        'max_capacity',
+        'stock',
+        'article_id',
+    ];
+
+    protected $casts = [
+        'features' => 'array',
+        'price' => 'decimal:2',
+        'discount_price' => 'decimal:2',
+        'is_featured' => 'boolean',
+        'stock' => 'integer',
+    ];
+
+    protected $appends = [
+        'image_url',
+        'is_wishlisted',
+        'video_url',
+    ];
+
+    public function getImageUrlAttribute()
+    {
+        $fallback = asset('images/placeholders/image-placeholder.png');
+
+        $url = $this->getValidMediaUrl($this->getFirstMedia('package_image'))
+            ?: $this->getValidMediaUrl($this->weddingOrganizer?->getFirstMedia('gallery'))
+            ?: null;
+
+        return $this->normalizeImageUrl($url, $fallback);
+    }
+
+    public function getVideoUrlAttribute(): ?string
+    {
+        $url = $this->getFirstMediaUrl('videos') ?: null;
+        return $url ? \App\Providers\NativeServiceProvider::normalizeUrl($url) : null;
+    }
+
+    public function getIsOutOfStockAttribute(): bool
+    {
+        return $this->stock <= 0;
+    }
+
+    public function getIsWishlistedAttribute(): bool
+    {
+        // Prioritas: Sanctum (mobile API) dulu, baru Filament (web)
+        try {
+            if (auth('sanctum')->check()) {
+                return $this->wishlists()->where('user_id', auth('sanctum')->id())->exists();
+            }
+        } catch (\Throwable $e) {
+            // Silently fail
+        }
+
+        try {
+            if (class_exists(Filament::class) && Filament::auth()->check()) {
+                return $this->wishlists()->where('user_id', Filament::auth()->id())->exists();
+            }
+        } catch (\Throwable $e) {
+            // Silently fail
+        }
+
+        return false;
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    public function article()
+    {
+        return $this->belongsTo(Article::class);
+    }
+
+    public function getCategoryColorAttribute(): string
+    {
+        return $this->color ?? $this->category?->color ?? '#6366f1';
+    }
+
+    public function getFinalPriceAttribute(): float
+    {
+        return ($this->discount_price > 0) ? (float) $this->discount_price : (float) $this->price;
+    }
+
+    public function getBadgeStyleAttribute(): string
+    {
+        $color = $this->category_color;
+
+        return "background: linear-gradient(135deg, {$color} 0%, {$color}cc 100%); 
+                color: white; 
+                box-shadow: 0 4px 12px {$color}40; 
+                font-weight: 700; 
+                text-transform: uppercase; 
+                letter-spacing: 0.05em;
+                padding: 4px 12px;
+                border-radius: 99px;
+                font-size: 0.7rem;
+                border: none;";
+    }
+
+    private function normalizeImageUrl(?string $url, string $fallback): string
+    {
+        if (! filled($url)) {
+            return $fallback;
+        }
+
+        // If it's already a full URL or a data URI, return it
+        if (Str::startsWith($url, ['http://', 'https://', 'data:image'])) {
+            // Normalize host IP for NativePHP mobile
+            return \App\Providers\NativeServiceProvider::normalizeUrl($url);
+        }
+
+        // If it starts with a slash, check if it's already a public path
+        if (Str::startsWith($url, '/')) {
+            return $url;
+        }
+
+        // Otherwise, resolve via the public storage disk
+        $resolved = asset('storage/'.ltrim($url, '/'));
+
+        return \App\Providers\NativeServiceProvider::normalizeUrl($resolved);
+    }
+
+    private function getValidMediaUrl(?Media $media): ?string
+    {
+        if (! $media) {
+            return null;
+        }
+
+        return $media->getUrl();
+    }
+}

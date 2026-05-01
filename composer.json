@@ -1,0 +1,29 @@
+{
+    "name": "aanugerah/wedding-pro",
+    "description": "A comprehensive Wedding Organizer management suite for Filament PHP with Native Mobile integration.",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Anugerah Ahmad Fachrurochim",
+            "email": "aanugerahahmadf16@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "filament/filament": "^3.0",
+        "nativephp/mobile": "^0.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Aanugerah\\WeddingPro\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Aanugerah\\WeddingPro\\WeddingProServiceProvider"
+            ]
+        }
+    }
+}

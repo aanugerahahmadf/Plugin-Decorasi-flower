@@ -252,6 +252,6 @@ Harap dicatat bahwa plugin ini mengimpor dan bergantung pada beberapa perpustaka
 ---
 
 <div align="center">
-    Dibuat dan dipelihara dengan ❤️ oleh <a href="https://github.com/aanugerahahmadf">Ahmad Fachrurochim</a>. <br>
+    Dibuat dan dipelihara dengan ❤️ oleh <a href="https://github.com/aanugerahahmadf">Anugerah Ahmad Fachrurochim</a>. <br>
     <em>Solusi Sistem Informasi Pernikahan Cerdas Masa Depan.</em>
 </div>

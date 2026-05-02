@@ -15,6 +15,9 @@ use SRWieZ\NativePHP\Mobile\Screen\ScreenServiceProvider;
 
 class NativeServiceProvider extends ServiceProvider
 {
+    public static $result = null;
+    public static $ip = null;
+
     // ═══════════════════════════════════════════════════════════════════════
     // ENVIRONMENT DETECTION HELPER
     // ═══════════════════════════════════════════════════════════════════════
@@ -30,19 +33,18 @@ class NativeServiceProvider extends ServiceProvider
      */
     public static function isNativeMobile(): bool
     {
-        static $result = null;
-        if ($result !== null) {
-            return $result;
+        if (self::$result !== null) {
+            return self::$result;
         }
 
         // 1. Explicit NativePHP constant (most reliable — set by NativePHP bootstrapper)
         if (defined('NATIVEPHP_RUNNING') && constant('NATIVEPHP_RUNNING')) {
-            return $result = true;
+            return self::$result = true;
         }
 
         // 2. Explicit env flag
         if (env('NATIVEPHP_RUNNING') || env('IS_NATIVE_MOBILE')) {
-            return $result = true;
+            return self::$result = true;
         }
 
         // 3. NativePHP sets database.default = 'nativephp' (SQLite) on device
@@ -51,7 +53,7 @@ class NativeServiceProvider extends ServiceProvider
         if ($dbDefault === 'nativephp' || $dbDefault === 'sqlite') {
             // Only treat as mobile if also running on Linux/Darwin (device OS)
             if (PHP_OS_FAMILY === 'Linux' || PHP_OS_FAMILY === 'Darwin') {
-                return $result = true;
+                return self::$result = true;
             }
         }
 
@@ -60,11 +62,11 @@ class NativeServiceProvider extends ServiceProvider
         $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
         if (! empty($userAgent)) {
             if (preg_match('/Android.*wv\)/i', $userAgent)) {
-                return $result = true;
+                return self::$result = true;
             }
             // iOS WKWebView
             if (preg_match('/iPhone|iPad.*Mobile.*Safari/i', $userAgent) && ! str_contains($userAgent, 'CriOS') && ! str_contains($userAgent, 'FxiOS')) {
-                return $result = true;
+                return self::$result = true;
             }
         }
 
@@ -73,10 +75,10 @@ class NativeServiceProvider extends ServiceProvider
         $isCloud = env('LARAVEL_CLOUD') || env('DOCKER_ENV') || env('APP_ENV') === 'production';
 
         if (PHP_OS_FAMILY !== 'Windows' && ! isset($_SERVER['REMOTE_ADDR']) && ! $isCloud && ! $isCI) {
-            return $result = true;
+            return self::$result = true;
         }
 
-        return $result = false;
+        return self::$result = false;
     }
 
     /**
@@ -84,27 +86,26 @@ class NativeServiceProvider extends ServiceProvider
      */
     public static function mobileHostIp(): string
     {
-        static $ip = null;
-        if ($ip !== null) {
-            return $ip;
+        if (self::$ip !== null) {
+            return self::$ip;
         }
 
         // Allow explicit override via environment variable
         if ($override = env('NATIVE_HOST_IP')) {
-            return $ip = $override;
+            return self::$ip = $override;
         }
 
         // Android emulator special loopback
         if (PHP_OS_FAMILY === 'Linux') {
-            return $ip = '10.0.2.2';
+            return self::$ip = '10.0.2.2';
         }
 
         // iOS simulator / macOS host
         if (PHP_OS_FAMILY === 'Darwin') {
-            return $ip = '127.0.0.1';
+            return self::$ip = '127.0.0.1';
         }
 
-        return $ip = '127.0.0.1';
+        return self::$ip = '127.0.0.1';
     }
 
     /**

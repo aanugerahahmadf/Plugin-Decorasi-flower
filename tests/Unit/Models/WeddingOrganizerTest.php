@@ -3,7 +3,7 @@
 namespace Aanugerah\WeddingPro\Tests\Unit\Models;
 
 use Aanugerah\WeddingPro\Models\WeddingOrganizer;
-use PHPUnit\Framework\TestCase;
+use Orchestra\Testbench\TestCase;
 
 class WeddingOrganizerTest extends TestCase
 {
@@ -34,7 +34,7 @@ class WeddingOrganizerTest extends TestCase
     {
         $wo = new WeddingOrganizer();
         $wo->address = 'Jl. Sudirman No. 1, Menteng, Jakarta Pusat, DKI Jakarta, Indonesia';
-        $this->assertSame('DKI Jakarta', $wo->city);
+        $this->assertSame('Jakarta Pusat, DKI Jakarta', $wo->city);
     }
 
     public function test_strips_indonesia_suffix(): void

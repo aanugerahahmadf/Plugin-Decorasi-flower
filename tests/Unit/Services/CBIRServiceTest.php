@@ -165,7 +165,7 @@ class CBIRServiceTest extends TestCase
             'http://127.0.0.1:5000/api/index/add' => Http::response(null, 500),
         ]);
 
-        $media = Mockery::mock(\Spatie\MediaLibrary\MediaCollections\Models\Media::class);
+        $media = Mockery::mock(\Spatie\MediaLibrary\MediaCollections\Models\Media::class)->makePartial();
         $media->shouldReceive('getPath')->andReturn('/tmp/fake.jpg');
         $media->shouldReceive('getUrl')->andReturn('http://example.com/fake.jpg');
         $media->model_type = \Aanugerah\WeddingPro\Models\Package::class;
@@ -184,7 +184,7 @@ class CBIRServiceTest extends TestCase
 
         Cache::put('cbir_cache_version', 1);
 
-        $media = Mockery::mock(\Spatie\MediaLibrary\MediaCollections\Models\Media::class);
+        $media = Mockery::mock(\Spatie\MediaLibrary\MediaCollections\Models\Media::class)->makePartial();
         $media->shouldReceive('getPath')->andReturn('/tmp/fake.jpg');
         $media->shouldReceive('getUrl')->andReturn('http://example.com/fake.jpg');
         $media->model_type = \Aanugerah\WeddingPro\Models\Package::class;

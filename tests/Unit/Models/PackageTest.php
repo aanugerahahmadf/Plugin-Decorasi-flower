@@ -3,7 +3,7 @@
 namespace Aanugerah\WeddingPro\Tests\Unit\Models;
 
 use Aanugerah\WeddingPro\Models\Package;
-use PHPUnit\Framework\TestCase;
+use Orchestra\Testbench\TestCase;
 
 class PackageTest extends TestCase
 {

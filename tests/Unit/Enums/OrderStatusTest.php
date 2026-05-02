@@ -3,7 +3,7 @@
 namespace Aanugerah\WeddingPro\Tests\Unit\Enums;
 
 use Aanugerah\WeddingPro\Enums\OrderStatus;
-use PHPUnit\Framework\TestCase;
+use Orchestra\Testbench\TestCase;
 
 class OrderStatusTest extends TestCase
 {

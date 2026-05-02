@@ -5,7 +5,7 @@ namespace Aanugerah\WeddingPro\Tests\Unit\Models;
 use Aanugerah\WeddingPro\Enums\OrderPaymentStatus;
 use Aanugerah\WeddingPro\Enums\OrderStatus;
 use Aanugerah\WeddingPro\Models\Order;
-use PHPUnit\Framework\TestCase;
+use Orchestra\Testbench\TestCase;
 
 class OrderTest extends TestCase
 {

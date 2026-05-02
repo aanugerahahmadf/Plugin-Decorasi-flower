@@ -7,9 +7,63 @@ on:
     branches: [main]
 
 jobs:
+  # ─────────────────────────────────────────────
+  # JOB 1: Syntax & Dependency Check
+  # ─────────────────────────────────────────────
   test:
     runs-on: ubuntu-latest
-    name: PHP 8.3
+    name: PHP ${{ matrix.php }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: [8.2, 8.3]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, readline, ldap, msgpack, igbinary, redis, memcached, pcov
+          coverage: none
+          tools: composer:v2
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-php${{ matrix.php }}-${{ hashFiles('**/composer.json') }}
+          restore-keys: composer-php${{ matrix.php }}-
+
+      - name: Install dependencies
+        run: |
+          composer install \
+            --prefer-dist \
+            --no-interaction \
+            --no-progress \
+            --ignore-platform-req=ext-pcntl \
+            --ignore-platform-req=ext-posix \
+            --ignore-platform-req=ext-swoole
+
+      - name: Check PHP Syntax (all src files)
+        run: find src -name "*.php" -print0 | xargs -0 -n1 php -l
+
+      - name: Check PHP Syntax (migrations)
+        run: find database -name "*.php" -print0 | xargs -0 -n1 php -l
+
+      - name: Verify autoload resolves
+        run: composer dump-autoload --optimize
+
+  # ─────────────────────────────────────────────
+  # JOB 2: Code Style (Pint)
+  # ─────────────────────────────────────────────
+  lint:
+    runs-on: ubuntu-latest
+    name: Code Style (Pint)
+    needs: test
 
     steps:
       - name: Checkout code
@@ -19,13 +73,92 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.3
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, readline, ldap, msgpack, igbinary, redis, swoole, memcached, pcov
-          coverage: none
+          tools: composer:v2
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-lint-${{ hashFiles('**/composer.json') }}
 
       - name: Install dependencies
         run: |
-          composer install --prefer-dist --no-interaction --no-progress --ignore-platform-req=ext-pcntl --ignore-platform-req=ext-posix
+          composer install \
+            --prefer-dist \
+            --no-interaction \
+            --no-progress \
+            --ignore-platform-req=ext-pcntl \
+            --ignore-platform-req=ext-posix \
+            --ignore-platform-req=ext-swoole
 
-      - name: Check PHP Syntax
+      - name: Run Laravel Pint (dry-run)
         run: |
-          find src -name "*.php" -print0 | xargs -0 -n1 php -l
+          if [ -f vendor/bin/pint ]; then
+            vendor/bin/pint --test
+          else
+            echo "Pint not installed, skipping."
+          fi
+
+  # ─────────────────────────────────────────────
+  # JOB 3: Auto-tag & Release on push to main
+  # ─────────────────────────────────────────────
+  release:
+    runs-on: ubuntu-latest
+    name: Auto Release
+    needs: [test, lint]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get latest tag
+        id: get_tag
+        run: |
+          LATEST=$(git tag --sort=-v:refname | head -n1)
+          echo "latest=${LATEST:-v0.0.0}" >> $GITHUB_OUTPUT
+
+      - name: Bump patch version
+        id: bump
+        run: |
+          LATEST="${{ steps.get_tag.outputs.latest }}"
+          # Strip leading 'v'
+          VERSION="${LATEST#v}"
+          MAJOR=$(echo $VERSION | cut -d. -f1)
+          MINOR=$(echo $VERSION | cut -d. -f2)
+          PATCH=$(echo $VERSION | cut -d. -f3)
+          NEW_PATCH=$((PATCH + 1))
+          NEW_TAG="v${MAJOR}.${MINOR}.${NEW_PATCH}"
+          echo "new_tag=${NEW_TAG}" >> $GITHUB_OUTPUT
+
+      - name: Create & push new tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ steps.bump.outputs.new_tag }}
+          git push origin ${{ steps.bump.outputs.new_tag }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.bump.outputs.new_tag }}
+          name: "Release ${{ steps.bump.outputs.new_tag }}"
+          body: |
+            ## 🚀 Release ${{ steps.bump.outputs.new_tag }}
+
+            Auto-generated release from commit `${{ github.sha }}`.
+
+            ### Changes
+            ${{ github.event.head_commit.message }}
+
+            ### Install
+            ```bash
+            composer require aanugerah/wedding-pro
+            ```
+          draft: false
+          prerelease: false

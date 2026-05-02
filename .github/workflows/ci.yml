@@ -61,7 +61,7 @@ jobs:
 
   test-filament3:
     runs-on: ubuntu-latest
-    name: "🧪 Test (Filament 3 · PHP 8.2)"
+    name: "🧪 Test (Filament 3 · PHP 8.3)"
     needs: [syntax, validate]
 
     steps:
@@ -69,7 +69,7 @@ jobs:
 
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.2
+          php-version: 8.3
           extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite, pdo_sqlite, bcmath, intl, pcov
           coverage: pcov
           tools: composer:v2
@@ -78,8 +78,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.composer/cache
-          key: composer-f3-php82-${{ hashFiles('**/composer.json') }}
-          restore-keys: composer-f3-php82-
+          key: composer-f3-php83-${{ hashFiles('**/composer.json') }}
+          restore-keys: composer-f3-php83-
 
       - name: Install dependencies
         run: |
@@ -90,8 +90,7 @@ jobs:
             --no-progress \
             --ignore-platform-req=ext-pcntl \
             --ignore-platform-req=ext-posix \
-            --ignore-platform-req=ext-swoole \
-            --ignore-platform-req=php
+            --ignore-platform-req=ext-swoole
 
       - name: Verify autoload
         run: composer dump-autoload --optimize
@@ -143,8 +142,7 @@ jobs:
             --no-progress \
             --ignore-platform-req=ext-pcntl \
             --ignore-platform-req=ext-posix \
-            --ignore-platform-req=ext-swoole \
-            --ignore-platform-req=php
+            --ignore-platform-req=ext-swoole
 
       - name: Run Pint (dry-run)
         run: |
@@ -180,8 +178,7 @@ jobs:
             --no-progress \
             --ignore-platform-req=ext-pcntl \
             --ignore-platform-req=ext-posix \
-            --ignore-platform-req=ext-swoole \
-            --ignore-platform-req=php
+            --ignore-platform-req=ext-swoole
 
       - name: Run security audit
         run: composer audit --format=plain || true

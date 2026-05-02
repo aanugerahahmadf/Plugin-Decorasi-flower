@@ -26,7 +26,7 @@
         "emmanpbarrameda/filament-take-picture-field": "Required for camera capture in PackageResource and ProductResource visual search (Filament 4+ only). Install with: composer require emmanpbarrameda/filament-take-picture-field:^1.3"
     },
     "require-dev": {
-        "pestphp/pest": "^2.0",
+        "pestphp/pest": "^2.36",
         "mockery/mockery": "^1.6"
     },
     "autoload": {

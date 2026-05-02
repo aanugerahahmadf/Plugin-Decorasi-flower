@@ -12,6 +12,7 @@ class WeddingProServiceProvider extends PackageServiceProvider
         parent::register();
 
         $this->app->register(AutoTranslationServiceProvider::class);
+        $this->app->register(NativeServiceProvider::class);
     }
 
     public function configurePackage(Package $package): void
@@ -40,6 +41,7 @@ class WeddingProServiceProvider extends PackageServiceProvider
                 '2026_02_09_170826_create_fm_messages_table',
                 '2026_04_26_004259_add_meta_to_fm_messages_table',
                 '2026_04_26_004311_add_meta_to_fm_inboxes_table',
+                '2026_05_03_000000_create_translations_table',
             ]);
     }
 

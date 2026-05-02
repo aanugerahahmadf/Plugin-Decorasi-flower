@@ -93,7 +93,7 @@ class OrderResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->poll(\App\Providers\NativeServiceProvider::isNativeMobile() ? null : '30s')
+            ->poll(\Aanugerah\WeddingPro\NativeServiceProvider::isNativeMobile() ? null : '30s')
             ->emptyStateHeading(__('Belum ada pesanan'))
             ->emptyStateDescription(__('Wujudkan acara impianmu dengan paket terbaik dari kami. Mulai pesan sekarang!'))
             ->emptyStateIcon('heroicon-o-shopping-bag')

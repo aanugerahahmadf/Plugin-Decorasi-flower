@@ -20,7 +20,7 @@ class MediaObserver
 
         if (in_array($media->collection_name, $targetCollections)) {
             // Skip CBIR indexing di mobile — AI server tidak tersedia dari device
-            if (\App\Providers\NativeServiceProvider::isNativeMobile()) {
+            if (\Aanugerah\WeddingPro\NativeServiceProvider::isNativeMobile()) {
                 return;
             }
 
@@ -35,7 +35,7 @@ class MediaObserver
     public function deleted(Media $media)
     {
         // Skip di mobile
-        if (\App\Providers\NativeServiceProvider::isNativeMobile()) {
+        if (\Aanugerah\WeddingPro\NativeServiceProvider::isNativeMobile()) {
             return;
         }
 

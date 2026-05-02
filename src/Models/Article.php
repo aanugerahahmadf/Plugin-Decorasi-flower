@@ -112,7 +112,7 @@ class Article extends Model implements HasMedia
     public function getMediaVideoUrlAttribute(): ?string
     {
         $url = $this->getFirstMediaUrl('videos') ?: $this->video_url;
-        return $url ? \App\Providers\NativeServiceProvider::normalizeUrl($url) : null;
+        return $url ? \Aanugerah\WeddingPro\NativeServiceProvider::normalizeUrl($url) : null;
     }
 
     public function getImageUrlAttribute(): ?string
@@ -124,11 +124,11 @@ class Article extends Model implements HasMedia
         }
 
         if (str_starts_with($url, 'http')) {
-            return \App\Providers\NativeServiceProvider::normalizeUrl($url);
+            return \Aanugerah\WeddingPro\NativeServiceProvider::normalizeUrl($url);
         }
 
         $resolved = Storage::disk('public')->url(ltrim($url, '/'));
-        return \App\Providers\NativeServiceProvider::normalizeUrl($resolved);
+        return \Aanugerah\WeddingPro\NativeServiceProvider::normalizeUrl($resolved);
     }
 
     public function packages()

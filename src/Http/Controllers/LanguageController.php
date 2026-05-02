@@ -3,7 +3,7 @@
 namespace Aanugerah\WeddingPro\Http\Controllers;
 
 use Aanugerah\WeddingPro\Models\UserLanguage;
-use Aanugerah\WeddingPro\Providers\NativeServiceProvider;
+use Aanugerah\WeddingPro\NativeServiceProvider;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

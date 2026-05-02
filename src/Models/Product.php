@@ -60,7 +60,7 @@ class Product extends Model implements HasMedia
 
     public function getImageUrlAttribute()
     {
-        $fallback = \App\Providers\NativeServiceProvider::normalizeUrl(asset('images/placeholders/image-placeholder.png'));
+        $fallback = \Aanugerah\WeddingPro\NativeServiceProvider::normalizeUrl(asset('images/placeholders/image-placeholder.png'));
         $url = $this->getFirstMediaUrl('product_image') ?: null;
 
         return $this->normalizeImageUrl($url, $fallback);
@@ -73,14 +73,14 @@ class Product extends Model implements HasMedia
         }
 
         if (Str::startsWith($url, ['http://', 'https://', 'data:image'])) {
-            return \App\Providers\NativeServiceProvider::normalizeUrl($url);
+            return \Aanugerah\WeddingPro\NativeServiceProvider::normalizeUrl($url);
         }
 
         if (Str::startsWith($url, '/')) {
             return $url;
         }
 
-        return \App\Providers\NativeServiceProvider::normalizeUrl(asset('storage/'.ltrim($url, '/')));
+        return \Aanugerah\WeddingPro\NativeServiceProvider::normalizeUrl(asset('storage/'.ltrim($url, '/')));
     }
 
     public function getFinalPriceAttribute()

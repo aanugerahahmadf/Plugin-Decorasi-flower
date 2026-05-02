@@ -2,7 +2,7 @@
 
 namespace Aanugerah\WeddingPro\Helpers;
 
-use Aanugerah\WeddingPro\Providers\NativeServiceProvider;
+use Aanugerah\WeddingPro\NativeServiceProvider;
 use Native\Mobile\Notification;
 
 class NativeNotificationHelper

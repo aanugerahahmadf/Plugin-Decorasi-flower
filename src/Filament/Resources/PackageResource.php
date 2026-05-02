@@ -89,7 +89,7 @@ class PackageResource extends Resource
     {
         return $table
             ->recordUrl(fn ($record) => static::getUrl('view', ['record' => $record]))
-            ->poll(\App\Providers\NativeServiceProvider::isNativeMobile() ? null : '30s')
+            ->poll(\Aanugerah\WeddingPro\NativeServiceProvider::isNativeMobile() ? null : '30s')
             ->headerActions([
                 Tables\Actions\Action::make('visual_search')
                     ->label(__('Pencarian Paket Dekorasi Bunga'))

@@ -13,6 +13,7 @@ use Aanugerah\WeddingPro\Filament\Resources\WishlistResource;
 use Aanugerah\WeddingPro\Filament\Resources\ReviewResource;
 use Aanugerah\WeddingPro\Filament\Resources\ArticleResource;
 use Aanugerah\WeddingPro\Filament\Resources\HistoryResource;
+use Aanugerah\WeddingPro\Filament\User\Pages\MessagesPage;
 
 class WeddingProPlugin implements Plugin
 {
@@ -38,6 +39,9 @@ class WeddingProPlugin implements Plugin
                 ReviewResource::class,
                 ArticleResource::class,
                 HistoryResource::class,
+            ])
+            ->pages([
+                MessagesPage::class,
             ]);
     }
 

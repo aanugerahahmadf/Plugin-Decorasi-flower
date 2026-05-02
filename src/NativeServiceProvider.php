@@ -37,7 +37,8 @@ class NativeServiceProvider extends ServiceProvider
             return self::$result;
         }
 
-        $isCI = env('GITHUB_ACTIONS') || \Illuminate\Support\Facades\App::runningUnitTests();
+        $isPHPUnit = defined('PHPUNIT_COMPOSER_INSTALL') || defined('__PHPUNIT_PHAR__');
+        $isCI = env('GITHUB_ACTIONS') || env('CI') || $isPHPUnit || (class_exists(\Illuminate\Support\Facades\App::class) && \Illuminate\Support\Facades\App::runningUnitTests());
         $isCloud = env('LARAVEL_CLOUD') || env('DOCKER_ENV') || env('APP_ENV') === 'production';
 
         // 1. Explicit NativePHP constant (most reliable — set by NativePHP bootstrapper)

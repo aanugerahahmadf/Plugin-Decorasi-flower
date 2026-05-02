@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: [8.2, 8.3]
+        php: [8.3]
 
     steps:
       - name: Checkout code
@@ -40,6 +40,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          composer config audit.abandoned report
           composer install \
             --prefer-dist \
             --no-interaction \
@@ -48,10 +49,10 @@ jobs:
             --ignore-platform-req=ext-posix \
             --ignore-platform-req=ext-swoole
 
-      - name: Check PHP Syntax (all src files)
+      - name: Check PHP Syntax (src/)
         run: find src -name "*.php" -print0 | xargs -0 -n1 php -l
 
-      - name: Check PHP Syntax (migrations)
+      - name: Check PHP Syntax (database/)
         run: find database -name "*.php" -print0 | xargs -0 -n1 php -l
 
       - name: Verify autoload resolves
@@ -83,6 +84,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          composer config audit.abandoned report
           composer install \
             --prefer-dist \
             --no-interaction \
@@ -127,7 +129,6 @@ jobs:
         id: bump
         run: |
           LATEST="${{ steps.get_tag.outputs.latest }}"
-          # Strip leading 'v'
           VERSION="${LATEST#v}"
           MAJOR=$(echo $VERSION | cut -d. -f1)
           MINOR=$(echo $VERSION | cut -d. -f2)

@@ -1,44 +1,55 @@
 <?php
 
+namespace Aanugerah\WeddingPro\Tests\Unit\Enums;
+
 use Aanugerah\WeddingPro\Enums\OrderPaymentStatus;
+use PHPUnit\Framework\TestCase;
 
-it('has correct values for all cases', function () {
-    expect(OrderPaymentStatus::UNPAID->value)->toBe('unpaid');
-    expect(OrderPaymentStatus::PENDING->value)->toBe('pending');
-    expect(OrderPaymentStatus::PARTIAL->value)->toBe('partial');
-    expect(OrderPaymentStatus::PAID->value)->toBe('paid');
-    expect(OrderPaymentStatus::FAILED->value)->toBe('failed');
-    expect(OrderPaymentStatus::REFUNDED->value)->toBe('refunded');
-});
+class OrderPaymentStatusTest extends TestCase
+{
+    public function test_has_correct_values(): void
+    {
+        $this->assertSame('unpaid', OrderPaymentStatus::UNPAID->value);
+        $this->assertSame('pending', OrderPaymentStatus::PENDING->value);
+        $this->assertSame('partial', OrderPaymentStatus::PARTIAL->value);
+        $this->assertSame('paid', OrderPaymentStatus::PAID->value);
+        $this->assertSame('failed', OrderPaymentStatus::FAILED->value);
+        $this->assertSame('refunded', OrderPaymentStatus::REFUNDED->value);
+    }
 
-it('returns correct label for each status', function () {
-    expect(OrderPaymentStatus::UNPAID->getLabel())->toBe('Belum Bayar');
-    expect(OrderPaymentStatus::PENDING->getLabel())->toBe('Menunggu Konfirmasi');
-    expect(OrderPaymentStatus::PARTIAL->getLabel())->toBe('DP / Sebagian');
-    expect(OrderPaymentStatus::PAID->getLabel())->toBe('Lunas');
-    expect(OrderPaymentStatus::FAILED->getLabel())->toBe('Gagal');
-    expect(OrderPaymentStatus::REFUNDED->getLabel())->toBe('Refund');
-});
+    public function test_returns_correct_label(): void
+    {
+        $this->assertSame('Belum Bayar', OrderPaymentStatus::UNPAID->getLabel());
+        $this->assertSame('Menunggu Konfirmasi', OrderPaymentStatus::PENDING->getLabel());
+        $this->assertSame('DP / Sebagian', OrderPaymentStatus::PARTIAL->getLabel());
+        $this->assertSame('Lunas', OrderPaymentStatus::PAID->getLabel());
+        $this->assertSame('Gagal', OrderPaymentStatus::FAILED->getLabel());
+        $this->assertSame('Refund', OrderPaymentStatus::REFUNDED->getLabel());
+    }
 
-it('returns correct color for each status', function () {
-    expect(OrderPaymentStatus::UNPAID->getColor())->toBe('danger');
-    expect(OrderPaymentStatus::PENDING->getColor())->toBe('warning');
-    expect(OrderPaymentStatus::PARTIAL->getColor())->toBe('info');
-    expect(OrderPaymentStatus::PAID->getColor())->toBe('success');
-    expect(OrderPaymentStatus::FAILED->getColor())->toBe('danger');
-    expect(OrderPaymentStatus::REFUNDED->getColor())->toBe('gray');
-});
+    public function test_returns_correct_color(): void
+    {
+        $this->assertSame('danger', OrderPaymentStatus::UNPAID->getColor());
+        $this->assertSame('warning', OrderPaymentStatus::PENDING->getColor());
+        $this->assertSame('info', OrderPaymentStatus::PARTIAL->getColor());
+        $this->assertSame('success', OrderPaymentStatus::PAID->getColor());
+        $this->assertSame('danger', OrderPaymentStatus::FAILED->getColor());
+        $this->assertSame('gray', OrderPaymentStatus::REFUNDED->getColor());
+    }
 
-it('returns correct icon for each status', function () {
-    expect(OrderPaymentStatus::UNPAID->getIcon())->toBe('heroicon-m-x-circle');
-    expect(OrderPaymentStatus::PENDING->getIcon())->toBe('heroicon-m-clock');
-    expect(OrderPaymentStatus::PARTIAL->getIcon())->toBe('heroicon-m-banknotes');
-    expect(OrderPaymentStatus::PAID->getIcon())->toBe('heroicon-m-check-circle');
-    expect(OrderPaymentStatus::FAILED->getIcon())->toBe('heroicon-m-exclamation-circle');
-    expect(OrderPaymentStatus::REFUNDED->getIcon())->toBe('heroicon-m-arrow-path');
-});
+    public function test_returns_correct_icon(): void
+    {
+        $this->assertSame('heroicon-m-x-circle', OrderPaymentStatus::UNPAID->getIcon());
+        $this->assertSame('heroicon-m-clock', OrderPaymentStatus::PENDING->getIcon());
+        $this->assertSame('heroicon-m-banknotes', OrderPaymentStatus::PARTIAL->getIcon());
+        $this->assertSame('heroicon-m-check-circle', OrderPaymentStatus::PAID->getIcon());
+        $this->assertSame('heroicon-m-exclamation-circle', OrderPaymentStatus::FAILED->getIcon());
+        $this->assertSame('heroicon-m-arrow-path', OrderPaymentStatus::REFUNDED->getIcon());
+    }
 
-it('can be created from string value', function () {
-    expect(OrderPaymentStatus::from('paid'))->toBe(OrderPaymentStatus::PAID);
-    expect(OrderPaymentStatus::from('refunded'))->toBe(OrderPaymentStatus::REFUNDED);
-});
+    public function test_can_be_created_from_string(): void
+    {
+        $this->assertSame(OrderPaymentStatus::PAID, OrderPaymentStatus::from('paid'));
+        $this->assertSame(OrderPaymentStatus::REFUNDED, OrderPaymentStatus::from('refunded'));
+    }
+}

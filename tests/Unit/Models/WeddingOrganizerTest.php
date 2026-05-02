@@ -1,94 +1,101 @@
 <?php
 
+namespace Aanugerah\WeddingPro\Tests\Unit\Models;
+
 use Aanugerah\WeddingPro\Models\WeddingOrganizer;
+use PHPUnit\Framework\TestCase;
 
-// ── getCityAttribute() ────────────────────────────────────────────────────
+class WeddingOrganizerTest extends TestCase
+{
+    // ── getCityAttribute() ────────────────────────────────────────────────
 
-it('returns Unknown when address is null', function () {
-    $wo = new WeddingOrganizer();
-    $wo->address = null;
+    public function test_returns_unknown_when_address_is_null(): void
+    {
+        $wo = new WeddingOrganizer();
+        $wo->address = null;
+        $this->assertSame('Unknown', $wo->city);
+    }
 
-    expect($wo->city)->toBe('Unknown');
-});
+    public function test_returns_full_address_when_one_part(): void
+    {
+        $wo = new WeddingOrganizer();
+        $wo->address = 'Jakarta';
+        $this->assertSame('Jakarta', $wo->city);
+    }
 
-it('returns full address when only 1 part', function () {
-    $wo = new WeddingOrganizer();
-    $wo->address = 'Jakarta';
+    public function test_returns_full_address_when_two_parts(): void
+    {
+        $wo = new WeddingOrganizer();
+        $wo->address = 'Bandung, Jawa Barat';
+        $this->assertSame('Bandung, Jawa Barat', $wo->city);
+    }
 
-    expect($wo->city)->toBe('Jakarta');
-});
+    public function test_returns_last_two_parts_for_long_address(): void
+    {
+        $wo = new WeddingOrganizer();
+        $wo->address = 'Jl. Sudirman No. 1, Menteng, Jakarta Pusat, DKI Jakarta, Indonesia';
+        $this->assertSame('DKI Jakarta', $wo->city);
+    }
 
-it('returns full address when only 2 parts', function () {
-    $wo = new WeddingOrganizer();
-    $wo->address = 'Bandung, Jawa Barat';
+    public function test_strips_indonesia_suffix(): void
+    {
+        $wo = new WeddingOrganizer();
+        $wo->address = 'Kota Surabaya, Jawa Timur, Indonesia';
+        $this->assertSame('Kota Surabaya, Jawa Timur', $wo->city);
+    }
 
-    expect($wo->city)->toBe('Bandung, Jawa Barat');
-});
+    public function test_returns_unknown_for_empty_address(): void
+    {
+        $wo = new WeddingOrganizer();
+        $wo->address = '';
+        $this->assertSame('Unknown', $wo->city);
+    }
 
-it('returns last 2 parts for long address', function () {
-    $wo = new WeddingOrganizer();
-    $wo->address = 'Jl. Sudirman No. 1, Menteng, Jakarta Pusat, DKI Jakarta, Indonesia';
+    // ── getLocationAttribute() ────────────────────────────────────────────
 
-    expect($wo->city)->toBe('DKI Jakarta');
-});
+    public function test_returns_location_as_lat_lng_array(): void
+    {
+        $wo = new WeddingOrganizer();
+        $wo->latitude = '-6.2088';
+        $wo->longitude = '106.8456';
 
-it('strips Indonesia suffix from long address', function () {
-    $wo = new WeddingOrganizer();
-    $wo->address = 'Kota Surabaya, Jawa Timur, Indonesia';
+        $location = $wo->location;
+        $this->assertSame(-6.2088, $location['lat']);
+        $this->assertSame(106.8456, $location['lng']);
+    }
 
-    expect($wo->city)->toBe('Kota Surabaya, Jawa Timur');
-});
+    public function test_set_location_sets_lat_and_lng(): void
+    {
+        $wo = new WeddingOrganizer();
+        $wo->location = ['lat' => -7.2575, 'lng' => 112.7521];
 
-it('returns Unknown for empty string address', function () {
-    $wo = new WeddingOrganizer();
-    $wo->address = '';
+        $this->assertSame(-7.2575, $wo->latitude);
+        $this->assertSame(112.7521, $wo->longitude);
+    }
 
-    expect($wo->city)->toBe('Unknown');
-});
+    public function test_set_location_does_nothing_when_null(): void
+    {
+        $wo = new WeddingOrganizer();
+        $wo->latitude = '-6.0';
+        $wo->longitude = '106.0';
+        $wo->location = null;
 
-// ── getLocationAttribute() ────────────────────────────────────────────────
+        $this->assertSame('-6.0', $wo->latitude);
+        $this->assertSame('106.0', $wo->longitude);
+    }
 
-it('returns location as lat/lng array', function () {
-    $wo = new WeddingOrganizer();
-    $wo->latitude = '-6.2088';
-    $wo->longitude = '106.8456';
+    // ── getOperationalHoursAttribute() ───────────────────────────────────
 
-    expect($wo->location)->toMatchArray([
-        'lat' => -6.2088,
-        'lng' => 106.8456,
-    ]);
-});
+    public function test_returns_default_operational_hours(): void
+    {
+        $wo = new WeddingOrganizer();
+        $this->assertSame('Senin - Minggu: 09:00 - 18:00', $wo->operational_hours);
+    }
 
-it('setLocationAttribute sets latitude and longitude', function () {
-    $wo = new WeddingOrganizer();
-    $wo->location = ['lat' => -7.2575, 'lng' => 112.7521];
-
-    expect($wo->latitude)->toBe(-7.2575);
-    expect($wo->longitude)->toBe(112.7521);
-});
-
-it('setLocationAttribute does nothing when null', function () {
-    $wo = new WeddingOrganizer();
-    $wo->latitude = '-6.0';
-    $wo->longitude = '106.0';
-    $wo->location = null;
-
-    // Tidak berubah
-    expect($wo->latitude)->toBe('-6.0');
-    expect($wo->longitude)->toBe('106.0');
-});
-
-// ── getOperationalHoursAttribute() ───────────────────────────────────────
-
-it('returns default operational hours when not set', function () {
-    $wo = new WeddingOrganizer();
-
-    expect($wo->operational_hours)->toBe('Senin - Minggu: 09:00 - 18:00');
-});
-
-it('returns custom operational hours when set', function () {
-    $wo = new WeddingOrganizer();
-    $wo->setRawAttributes(['operational_hours' => 'Senin - Jumat: 08:00 - 17:00']);
-
-    expect($wo->operational_hours)->toBe('Senin - Jumat: 08:00 - 17:00');
-});
+    public function test_returns_custom_operational_hours(): void
+    {
+        $wo = new WeddingOrganizer();
+        $wo->setRawAttributes(['operational_hours' => 'Senin - Jumat: 08:00 - 17:00']);
+        $this->assertSame('Senin - Jumat: 08:00 - 17:00', $wo->operational_hours);
+    }
+}

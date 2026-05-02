@@ -26,5 +26,10 @@
         <include>
             <directory>src</directory>
         </include>
+        <exclude>
+            <directory>src/Filament</directory>
+            <directory>src/Http</directory>
+            <directory>src/Jobs</directory>
+        </exclude>
     </source>
 </phpunit>

@@ -1,40 +1,52 @@
 <?php
 
+namespace Aanugerah\WeddingPro\Tests\Unit\Enums;
+
 use Aanugerah\WeddingPro\Enums\OrderStatus;
+use PHPUnit\Framework\TestCase;
 
-it('has correct values for all cases', function () {
-    expect(OrderStatus::PENDING->value)->toBe('pending');
-    expect(OrderStatus::CONFIRMED->value)->toBe('confirmed');
-    expect(OrderStatus::COMPLETED->value)->toBe('completed');
-    expect(OrderStatus::CANCELLED->value)->toBe('cancelled');
-});
+class OrderStatusTest extends TestCase
+{
+    public function test_has_correct_values(): void
+    {
+        $this->assertSame('pending', OrderStatus::PENDING->value);
+        $this->assertSame('confirmed', OrderStatus::CONFIRMED->value);
+        $this->assertSame('completed', OrderStatus::COMPLETED->value);
+        $this->assertSame('cancelled', OrderStatus::CANCELLED->value);
+    }
 
-it('returns correct label for each status', function () {
-    expect(OrderStatus::PENDING->getLabel())->toBe('Menunggu');
-    expect(OrderStatus::CONFIRMED->getLabel())->toBe('Dikonfirmasi');
-    expect(OrderStatus::COMPLETED->getLabel())->toBe('Selesai');
-    expect(OrderStatus::CANCELLED->getLabel())->toBe('Dibatalkan');
-});
+    public function test_returns_correct_label(): void
+    {
+        $this->assertSame('Menunggu', OrderStatus::PENDING->getLabel());
+        $this->assertSame('Dikonfirmasi', OrderStatus::CONFIRMED->getLabel());
+        $this->assertSame('Selesai', OrderStatus::COMPLETED->getLabel());
+        $this->assertSame('Dibatalkan', OrderStatus::CANCELLED->getLabel());
+    }
 
-it('returns correct color for each status', function () {
-    expect(OrderStatus::PENDING->getColor())->toBe('warning');
-    expect(OrderStatus::CONFIRMED->getColor())->toBe('primary');
-    expect(OrderStatus::COMPLETED->getColor())->toBe('success');
-    expect(OrderStatus::CANCELLED->getColor())->toBe('danger');
-});
+    public function test_returns_correct_color(): void
+    {
+        $this->assertSame('warning', OrderStatus::PENDING->getColor());
+        $this->assertSame('primary', OrderStatus::CONFIRMED->getColor());
+        $this->assertSame('success', OrderStatus::COMPLETED->getColor());
+        $this->assertSame('danger', OrderStatus::CANCELLED->getColor());
+    }
 
-it('returns correct icon for each status', function () {
-    expect(OrderStatus::PENDING->getIcon())->toBe('heroicon-m-clock');
-    expect(OrderStatus::CONFIRMED->getIcon())->toBe('heroicon-m-check-circle');
-    expect(OrderStatus::COMPLETED->getIcon())->toBe('heroicon-m-check-badge');
-    expect(OrderStatus::CANCELLED->getIcon())->toBe('heroicon-m-x-circle');
-});
+    public function test_returns_correct_icon(): void
+    {
+        $this->assertSame('heroicon-m-clock', OrderStatus::PENDING->getIcon());
+        $this->assertSame('heroicon-m-check-circle', OrderStatus::CONFIRMED->getIcon());
+        $this->assertSame('heroicon-m-check-badge', OrderStatus::COMPLETED->getIcon());
+        $this->assertSame('heroicon-m-x-circle', OrderStatus::CANCELLED->getIcon());
+    }
 
-it('can be created from string value', function () {
-    expect(OrderStatus::from('pending'))->toBe(OrderStatus::PENDING);
-    expect(OrderStatus::from('cancelled'))->toBe(OrderStatus::CANCELLED);
-});
+    public function test_can_be_created_from_string(): void
+    {
+        $this->assertSame(OrderStatus::PENDING, OrderStatus::from('pending'));
+        $this->assertSame(OrderStatus::CANCELLED, OrderStatus::from('cancelled'));
+    }
 
-it('returns null for unknown value via tryFrom', function () {
-    expect(OrderStatus::tryFrom('unknown'))->toBeNull();
-});
+    public function test_try_from_returns_null_for_unknown_value(): void
+    {
+        $this->assertNull(OrderStatus::tryFrom('unknown'));
+    }
+}

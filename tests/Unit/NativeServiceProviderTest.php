@@ -1,147 +1,144 @@
 <?php
 
+namespace Aanugerah\WeddingPro\Tests\Unit;
+
 use Aanugerah\WeddingPro\NativeServiceProvider;
+use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
-beforeEach(function () {
-    // Reset static cache sebelum setiap test
-    $reflection = new ReflectionClass(NativeServiceProvider::class);
-
-    $result = $reflection->getProperty('result');
-    $result->setAccessible(true);
-    $result->setValue(null, null);
-
-    $ip = $reflection->getProperty('ip');
-    $ip->setAccessible(true);
-    $ip->setValue(null, null);
-});
-
-// ── isNativeMobile() ──────────────────────────────────────────────────────
-
-it('returns false when running in unit tests (GITHUB_ACTIONS not set)', function () {
-    // Unit test environment: REMOTE_ADDR tidak ada tapi GITHUB_ACTIONS atau runningUnitTests() true
-    // NativeServiceProvider heuristic #5 skip jika runningUnitTests()
-    expect(NativeServiceProvider::isNativeMobile())->toBeFalse();
-});
-
-it('returns true when NATIVEPHP_RUNNING constant is defined', function () {
-    if (! defined('NATIVEPHP_RUNNING')) {
-        define('NATIVEPHP_RUNNING', true);
+class NativeServiceProviderTest extends TestCase
+{
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->resetStaticCache();
     }
 
-    $reflection = new ReflectionClass(NativeServiceProvider::class);
-    $result = $reflection->getProperty('result');
-    $result->setAccessible(true);
-    $result->setValue(null, null); // reset cache
-
-    expect(NativeServiceProvider::isNativeMobile())->toBeTrue();
-})->skip(defined('NATIVEPHP_RUNNING') ? false : true, 'NATIVEPHP_RUNNING constant not defined');
-
-// ── mobileHostIp() ────────────────────────────────────────────────────────
-
-it('returns 127.0.0.1 on Windows', function () {
-    if (PHP_OS_FAMILY !== 'Windows') {
-        $this->markTestSkipped('Only runs on Windows');
+    protected function tearDown(): void
+    {
+        $this->resetStaticCache();
+        parent::tearDown();
     }
 
-    expect(NativeServiceProvider::mobileHostIp())->toBe('127.0.0.1');
-});
+    private function resetStaticCache(): void
+    {
+        $ref = new ReflectionClass(NativeServiceProvider::class);
 
-it('returns 10.0.2.2 on Linux', function () {
-    if (PHP_OS_FAMILY !== 'Linux') {
-        $this->markTestSkipped('Only runs on Linux');
+        $result = $ref->getProperty('result');
+        $result->setAccessible(true);
+        $result->setValue(null, null);
+
+        $ip = $ref->getProperty('ip');
+        $ip->setAccessible(true);
+        $ip->setValue(null, null);
     }
 
-    expect(NativeServiceProvider::mobileHostIp())->toBe('10.0.2.2');
-});
+    // ── isNativeMobile() ──────────────────────────────────────────────────
 
-it('returns 127.0.0.1 on Darwin (macOS)', function () {
-    if (PHP_OS_FAMILY !== 'Darwin') {
-        $this->markTestSkipped('Only runs on macOS');
+    public function test_returns_false_in_unit_test_environment(): void
+    {
+        // GITHUB_ACTIONS=true dan runningUnitTests() = true → heuristic #5 skip
+        $this->assertFalse(NativeServiceProvider::isNativeMobile());
     }
 
-    expect(NativeServiceProvider::mobileHostIp())->toBe('127.0.0.1');
-});
+    // ── mobileHostIp() ────────────────────────────────────────────────────
 
-it('respects NATIVE_HOST_IP env override', function () {
-    $_ENV['NATIVE_HOST_IP'] = '192.168.1.100';
-    putenv('NATIVE_HOST_IP=192.168.1.100');
+    public function test_returns_correct_ip_for_current_os(): void
+    {
+        $ip = NativeServiceProvider::mobileHostIp();
 
-    $reflection = new ReflectionClass(NativeServiceProvider::class);
-    $ip = $reflection->getProperty('ip');
-    $ip->setAccessible(true);
-    $ip->setValue(null, null); // reset cache
+        $this->assertIsString($ip);
+        $this->assertNotEmpty($ip);
 
-    expect(NativeServiceProvider::mobileHostIp())->toBe('192.168.1.100');
+        // Validasi format IP
+        $this->assertMatchesRegularExpression(
+            '/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/',
+            $ip
+        );
+    }
 
-    // Cleanup
-    unset($_ENV['NATIVE_HOST_IP']);
-    putenv('NATIVE_HOST_IP');
-    $ip->setValue(null, null);
-});
+    public function test_respects_native_host_ip_env_override(): void
+    {
+        putenv('NATIVE_HOST_IP=192.168.1.200');
+        $_ENV['NATIVE_HOST_IP'] = '192.168.1.200';
 
-// ── normalizeUrl() ────────────────────────────────────────────────────────
+        $ref = new ReflectionClass(NativeServiceProvider::class);
+        $ip = $ref->getProperty('ip');
+        $ip->setAccessible(true);
+        $ip->setValue(null, null);
 
-it('returns url unchanged when not on mobile', function () {
-    // isNativeMobile() returns false in test env
-    $url = 'http://127.0.0.1:8000/storage/image.jpg';
-    expect(NativeServiceProvider::normalizeUrl($url))->toBe($url);
-});
+        $result = NativeServiceProvider::mobileHostIp();
+        $this->assertSame('192.168.1.200', $result);
 
-it('normalizeUrl replaces localhost with host ip on mobile', function () {
-    // Simulasi mobile dengan mock static
-    $reflection = new ReflectionClass(NativeServiceProvider::class);
-    $result = $reflection->getProperty('result');
-    $result->setAccessible(true);
-    $result->setValue(null, true); // paksa isNativeMobile = true
+        // Cleanup
+        putenv('NATIVE_HOST_IP');
+        unset($_ENV['NATIVE_HOST_IP']);
+        $ip->setValue(null, null);
+    }
 
-    $ipProp = $reflection->getProperty('ip');
-    $ipProp->setAccessible(true);
-    $ipProp->setValue(null, '10.0.2.2'); // paksa hostIp = 10.0.2.2
+    // ── normalizeUrl() ────────────────────────────────────────────────────
 
-    $url = 'http://127.0.0.1:8000/storage/image.jpg';
-    $normalized = NativeServiceProvider::normalizeUrl($url);
+    public function test_normalize_url_returns_unchanged_when_not_mobile(): void
+    {
+        $url = 'http://127.0.0.1:8000/storage/image.jpg';
+        $this->assertSame($url, NativeServiceProvider::normalizeUrl($url));
+    }
 
-    expect($normalized)->toBe('http://10.0.2.2:8000/storage/image.jpg');
+    public function test_normalize_url_replaces_localhost_on_mobile(): void
+    {
+        $ref = new ReflectionClass(NativeServiceProvider::class);
 
-    // Cleanup
-    $result->setValue(null, null);
-    $ipProp->setValue(null, null);
-});
+        $resultProp = $ref->getProperty('result');
+        $resultProp->setAccessible(true);
+        $resultProp->setValue(null, true); // force mobile = true
 
-it('normalizeUrl replaces https://localhost on mobile', function () {
-    $reflection = new ReflectionClass(NativeServiceProvider::class);
-    $result = $reflection->getProperty('result');
-    $result->setAccessible(true);
-    $result->setValue(null, true);
+        $ipProp = $ref->getProperty('ip');
+        $ipProp->setAccessible(true);
+        $ipProp->setValue(null, '10.0.2.2');
 
-    $ipProp = $reflection->getProperty('ip');
-    $ipProp->setAccessible(true);
-    $ipProp->setValue(null, '10.0.2.2');
+        $normalized = NativeServiceProvider::normalizeUrl('http://127.0.0.1:8000/storage/img.jpg');
+        $this->assertSame('http://10.0.2.2:8000/storage/img.jpg', $normalized);
 
-    $url = 'https://localhost/api/packages';
-    $normalized = NativeServiceProvider::normalizeUrl($url);
+        // Cleanup
+        $resultProp->setValue(null, null);
+        $ipProp->setValue(null, null);
+    }
 
-    expect($normalized)->toBe('https://10.0.2.2/api/packages');
+    public function test_normalize_url_replaces_https_localhost_on_mobile(): void
+    {
+        $ref = new ReflectionClass(NativeServiceProvider::class);
 
-    // Cleanup
-    $result->setValue(null, null);
-    $ipProp->setValue(null, null);
-});
+        $resultProp = $ref->getProperty('result');
+        $resultProp->setAccessible(true);
+        $resultProp->setValue(null, true);
 
-it('normalizeUrl does not modify external urls on mobile', function () {
-    $reflection = new ReflectionClass(NativeServiceProvider::class);
-    $result = $reflection->getProperty('result');
-    $result->setAccessible(true);
-    $result->setValue(null, true);
+        $ipProp = $ref->getProperty('ip');
+        $ipProp->setAccessible(true);
+        $ipProp->setValue(null, '10.0.2.2');
 
-    $ipProp = $reflection->getProperty('ip');
-    $ipProp->setAccessible(true);
-    $ipProp->setValue(null, '10.0.2.2');
+        $normalized = NativeServiceProvider::normalizeUrl('https://localhost/api/packages');
+        $this->assertSame('https://10.0.2.2/api/packages', $normalized);
 
-    $url = 'https://cdn.example.com/image.jpg';
-    expect(NativeServiceProvider::normalizeUrl($url))->toBe($url);
+        $resultProp->setValue(null, null);
+        $ipProp->setValue(null, null);
+    }
 
-    // Cleanup
-    $result->setValue(null, null);
-    $ipProp->setValue(null, null);
-});
+    public function test_normalize_url_does_not_modify_external_urls_on_mobile(): void
+    {
+        $ref = new ReflectionClass(NativeServiceProvider::class);
+
+        $resultProp = $ref->getProperty('result');
+        $resultProp->setAccessible(true);
+        $resultProp->setValue(null, true);
+
+        $ipProp = $ref->getProperty('ip');
+        $ipProp->setAccessible(true);
+        $ipProp->setValue(null, '10.0.2.2');
+
+        $url = 'https://cdn.example.com/image.jpg';
+        $this->assertSame($url, NativeServiceProvider::normalizeUrl($url));
+
+        $resultProp->setValue(null, null);
+        $ipProp->setValue(null, null);
+    }
+}

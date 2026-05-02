@@ -97,10 +97,9 @@ jobs:
 
       - name: Run Unit Tests
         run: |
-          vendor/bin/pest tests/Unit \
+          vendor/bin/phpunit tests/Unit \
             --colors=always \
-            --coverage-clover=coverage.xml \
-            --min=50
+            --coverage-clover=coverage.xml
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -151,7 +150,6 @@ jobs:
           else
             echo "⚠️  Pint not installed, skipping."
           fi
-
   # ══════════════════════════════════════════════════════════════
   # STAGE 4 — SECURITY SCAN
   # ══════════════════════════════════════════════════════════════

@@ -61,9 +61,70 @@ return [
     | Konfigurasi untuk integrasi NativePHP Mobile (Android/iOS).
     */
     'native' => [
-        'host_ip'       => env('NATIVE_HOST_IP', '10.0.2.2'),
-        'server_port'   => env('NATIVE_SERVER_PORT', 8000),
+        'host_ip'         => env('NATIVE_HOST_IP', '10.0.2.2'),
+        'server_port'     => env('NATIVE_SERVER_PORT', 8000),
         'db_proxy_secret' => env('NATIVE_DB_PROXY_SECRET', 'nativephp-db-proxy-secret-2024'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Messages / Chat Settings
+    |--------------------------------------------------------------------------
+    | Konfigurasi untuk fitur pesan dan AI Consultant Bot.
+    */
+    'messages' => [
+
+        /*
+         | Aktifkan/nonaktifkan AI Bot auto-reply.
+         | Jika false, bot tidak akan membalas pesan apapun.
+         */
+        'bot_enabled' => env('WEDDING_PRO_BOT_ENABLED', true),
+
+        /*
+         | Delay (detik) sebelum bot mengirim balasan.
+         | Memberikan kesan "sedang mengetik" yang natural.
+         */
+        'bot_reply_delay' => env('WEDDING_PRO_BOT_REPLY_DELAY', 5),
+
+        /*
+         | Nama role yang dianggap sebagai admin/bot sender.
+         | Bot akan mengirim pesan menggunakan akun dengan role ini.
+         */
+        'admin_role' => env('WEDDING_PRO_ADMIN_ROLE', 'super_admin'),
+
+        /*
+         | Aktifkan upload attachment (gambar/file) di chat.
+         */
+        'attachments_enabled' => env('WEDDING_PRO_ATTACHMENTS_ENABLED', true),
+
+        /*
+         | Ukuran maksimal attachment dalam kilobytes (KB).
+         | Default: 10240 KB = 10 MB
+         */
+        'max_attachment_size_kb' => env('WEDDING_PRO_MAX_ATTACHMENT_KB', 10240),
+
+        /*
+         | Tipe file yang diizinkan untuk di-upload di chat.
+         */
+        'allowed_attachment_types' => ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'doc', 'docx'],
+
+        /*
+         | Interval polling pesan (detik) di panel Filament.
+         | Set ke null untuk menonaktifkan polling (gunakan Reverb/WebSocket).
+         | Dinonaktifkan otomatis saat berjalan di NativePHP Mobile.
+         */
+        'polling_interval' => env('WEDDING_PRO_CHAT_POLLING', '5s'),
+
+        /*
+         | Jumlah maksimal pesan yang dimuat per halaman.
+         */
+        'messages_per_page' => env('WEDDING_PRO_MESSAGES_PER_PAGE', 50),
+
+        /*
+         | Nama collection media Spatie untuk attachment pesan.
+         */
+        'media_collection' => 'filament-messages',
+
     ],
 
 ];

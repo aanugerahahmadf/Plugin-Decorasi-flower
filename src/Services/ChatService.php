@@ -18,7 +18,7 @@ class ChatService
     public static function getOrCreateInboxWithAdmin(int $userId): Inbox
     {
         $admin = (config('auth.providers.users.model'))::whereHas('roles', function ($q) {
-            $q->where('name', 'super_admin');
+            $q->where('name', config('wedding-pro.messages.admin_role', 'super_admin'));
         })->first();
 
         if (! $admin) {
@@ -62,7 +62,9 @@ class ChatService
 
         // Dispatch bot reply if user is not admin
         if (Auth::user() && ! Auth::user()->hasRole('super_admin')) {
-            SendBotReply::dispatch($message->id)->delay(now()->addSeconds(5));
+            SendBotReply::dispatch($message->id)->delay(now()->addSeconds(
+                config('wedding-pro.messages.bot_reply_delay', 5)
+            ));
         }
 
         return $message;
@@ -97,7 +99,9 @@ class ChatService
 
         // Dispatch bot reply for new order
         if ($order->user && ! $order->user->hasRole('super_admin')) {
-            SendBotReply::dispatch($message->id)->delay(now()->addSeconds(5));
+            SendBotReply::dispatch($message->id)->delay(now()->addSeconds(
+                config('wedding-pro.messages.bot_reply_delay', 5)
+            ));
         }
 
         return $message;

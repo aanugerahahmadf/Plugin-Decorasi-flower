@@ -52,6 +52,11 @@ class SendBotReply implements ShouldQueue
             return;
         }
 
+        // Don't reply if bot is disabled via config
+        if (! config('wedding-pro.messages.bot_enabled', true)) {
+            return;
+        }
+
         // --- ADVANCED AI BRAIN ---
         $text = strtolower($userMessage->message);
         $reply = '';
@@ -174,7 +179,7 @@ class SendBotReply implements ShouldQueue
 
         // Send the bot message
         $admin = (config('auth.providers.users.model'))::whereHas('roles', function ($q) {
-            $q->where('name', 'super_admin');
+            $q->where('name', config('wedding-pro.messages.admin_role', 'super_admin'));
         })->first();
 
         if ($admin) {

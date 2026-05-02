@@ -37,6 +37,9 @@ class NativeServiceProvider extends ServiceProvider
             return self::$result;
         }
 
+        $isCI = env('GITHUB_ACTIONS') || \Illuminate\Support\Facades\App::runningUnitTests();
+        $isCloud = env('LARAVEL_CLOUD') || env('DOCKER_ENV') || env('APP_ENV') === 'production';
+
         // 1. Explicit NativePHP constant (most reliable — set by NativePHP bootstrapper)
         if (defined('NATIVEPHP_RUNNING') && constant('NATIVEPHP_RUNNING')) {
             return self::$result = true;
@@ -49,8 +52,9 @@ class NativeServiceProvider extends ServiceProvider
 
         // 3. NativePHP sets database.default = 'nativephp' (SQLite) on device
         //    Check this BEFORE any DB operations to avoid circular dependency
+        //    Guard: Don't trigger this in CI/Cloud where Linux + SQLite is common
         $dbDefault = env('DB_CONNECTION') ?: \Illuminate\Support\Facades\Config::get('database.default', 'sqlite');
-        if ($dbDefault === 'nativephp' || $dbDefault === 'sqlite') {
+        if (($dbDefault === 'nativephp' || $dbDefault === 'sqlite') && ! $isCI && ! $isCloud) {
             // Only treat as mobile if also running on Linux/Darwin (device OS)
             if (PHP_OS_FAMILY === 'Linux' || PHP_OS_FAMILY === 'Darwin') {
                 return self::$result = true;
@@ -71,9 +75,6 @@ class NativeServiceProvider extends ServiceProvider
         }
 
         // 5. Heuristic: non-Windows OS with no HTTP client (embedded PHP CLI server on device)
-        $isCI = env('GITHUB_ACTIONS') || \Illuminate\Support\Facades\App::runningUnitTests();
-        $isCloud = env('LARAVEL_CLOUD') || env('DOCKER_ENV') || env('APP_ENV') === 'production';
-
         if (PHP_OS_FAMILY !== 'Windows' && ! isset($_SERVER['REMOTE_ADDR']) && ! $isCloud && ! $isCI) {
             return self::$result = true;
         }

@@ -102,6 +102,9 @@ jobs:
       - name: Verify autoload
         run: composer dump-autoload --optimize
 
+      - name: Run Unit Tests
+        run: vendor/bin/pest tests/Unit --colors=always --no-coverage
+
   # ─────────────────────────────────────────────
   # JOB 4: Auto-tag & Release on push to main
   # ─────────────────────────────────────────────

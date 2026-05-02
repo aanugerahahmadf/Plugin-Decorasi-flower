@@ -1,0 +1,194 @@
+name: "🐛 Bug Report"
+description: Laporkan bug atau perilaku yang tidak sesuai harapan pada plugin Wedding Pro.
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+assignees: ["aanugerahahmadf"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Terima kasih telah meluangkan waktu untuk melaporkan bug ini! 🙏
+        Mohon isi formulir di bawah dengan **selengkap mungkin** agar kami bisa mereproduksi dan memperbaikinya dengan cepat.
+
+  # ── DESKRIPSI ──────────────────────────────────────────────────
+  - type: textarea
+    id: description
+    attributes:
+      label: "📋 Deskripsi Bug"
+      description: Jelaskan bug yang terjadi secara singkat dan jelas.
+      placeholder: "Contoh: Saat mengklik tombol 'Beli Sekarang' di PackageResource, muncul error 500..."
+    validations:
+      required: true
+
+  # ── LANGKAH REPRODUKSI ─────────────────────────────────────────
+  - type: textarea
+    id: steps
+    attributes:
+      label: "🔁 Langkah Reproduksi"
+      description: Langkah-langkah untuk mereproduksi bug ini.
+      placeholder: |
+        1. Buka panel admin → Katalog Paket Bunga
+        2. Klik tombol 'Pencarian Visual'
+        3. Upload gambar
+        4. Lihat error yang muncul
+    validations:
+      required: true
+
+  # ── PERILAKU YANG DIHARAPKAN ───────────────────────────────────
+  - type: textarea
+    id: expected
+    attributes:
+      label: "✅ Perilaku yang Diharapkan"
+      description: Apa yang seharusnya terjadi?
+      placeholder: "Seharusnya menampilkan hasil pencarian visual dengan daftar paket yang mirip."
+    validations:
+      required: true
+
+  # ── PERILAKU AKTUAL ────────────────────────────────────────────
+  - type: textarea
+    id: actual
+    attributes:
+      label: "❌ Perilaku Aktual"
+      description: Apa yang sebenarnya terjadi?
+      placeholder: "Muncul error: Class 'CBIRService' not found"
+    validations:
+      required: true
+
+  # ── SCREENSHOT / VIDEO ─────────────────────────────────────────
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "📸 Screenshot / Video (Opsional)"
+      description: Lampirkan screenshot atau rekaman layar jika ada.
+      placeholder: "Drag & drop gambar di sini, atau paste URL screenshot."
+
+  # ── ERROR LOG ──────────────────────────────────────────────────
+  - type: textarea
+    id: error_log
+    attributes:
+      label: "📄 Error Log / Stack Trace"
+      description: Tempel pesan error lengkap dari `storage/logs/laravel.log` atau browser console.
+      render: shell
+      placeholder: |
+        [2026-05-03 10:00:00] local.ERROR: Class not found...
+        #0 /vendor/...
+        #1 /src/...
+
+  # ── VERSI ──────────────────────────────────────────────────────
+  - type: input
+    id: plugin_version
+    attributes:
+      label: "📦 Versi Plugin"
+      description: Versi `aanugerah/wedding-pro` yang digunakan. Cek dengan `composer show aanugerah/wedding-pro`.
+      placeholder: "v1.0.5"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: filament_version
+    attributes:
+      label: "🎨 Versi Filament"
+      options:
+        - "Filament 3.x"
+        - "Filament 4.x"
+        - "Tidak tahu"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: php_version
+    attributes:
+      label: "🐘 Versi PHP"
+      options:
+        - "PHP 8.2"
+        - "PHP 8.3"
+        - "PHP 8.4"
+        - "Lainnya"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: laravel_version
+    attributes:
+      label: "⚡ Versi Laravel"
+      options:
+        - "Laravel 10.x"
+        - "Laravel 11.x"
+        - "Laravel 12.x"
+        - "Lainnya"
+    validations:
+      required: true
+
+  # ── ENVIRONMENT ────────────────────────────────────────────────
+  - type: dropdown
+    id: environment
+    attributes:
+      label: "🌍 Environment"
+      options:
+        - "Local (Laragon / XAMPP / Herd)"
+        - "NativePHP Mobile (Android)"
+        - "NativePHP Mobile (iOS)"
+        - "Production Server"
+        - "Docker"
+        - "Laravel Cloud"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: database
+    attributes:
+      label: "🗄️ Database"
+      options:
+        - "MySQL / MariaDB"
+        - "SQLite"
+        - "PostgreSQL"
+        - "Lainnya"
+
+  # ── FITUR TERDAMPAK ────────────────────────────────────────────
+  - type: checkboxes
+    id: affected_feature
+    attributes:
+      label: "🎯 Fitur yang Terdampak"
+      description: Centang semua yang relevan.
+      options:
+        - label: "AI Visual Search (CBIR)"
+        - label: "AI Consultant Bot (Chat)"
+        - label: "Midtrans Payment Gateway"
+        - label: "Katalog Paket (PackageResource)"
+        - label: "Katalog Bunga (ProductResource)"
+        - label: "Manajemen Pesanan (OrderResource)"
+        - label: "Keranjang Belanja (CartResource)"
+        - label: "Wishlist"
+        - label: "Review & Rating"
+        - label: "Artikel (ArticleResource)"
+        - label: "Riwayat Transaksi (HistoryResource)"
+        - label: "Pesan / Inbox (MessagesPage)"
+        - label: "Language Switcher / Auto Translation"
+        - label: "NativePHP Mobile Integration"
+        - label: "API Endpoint"
+        - label: "Migrasi Database"
+        - label: "Konfigurasi (config/midtrans.php, config/wedding-pro.php)"
+
+  # ── CHECKLIST ──────────────────────────────────────────────────
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: "✔️ Checklist Sebelum Submit"
+      options:
+        - label: "Saya sudah menjalankan `composer update aanugerah/wedding-pro` ke versi terbaru."
+          required: true
+        - label: "Saya sudah menjalankan `php artisan migrate` setelah update."
+          required: true
+        - label: "Saya sudah mencari issue serupa dan tidak menemukan duplikat."
+          required: true
+        - label: "Saya sudah menyertakan error log yang lengkap."
+          required: true
+
+  # ── INFORMASI TAMBAHAN ─────────────────────────────────────────
+  - type: textarea
+    id: additional
+    attributes:
+      label: "💬 Informasi Tambahan"
+      description: Apakah ada konteks lain yang relevan? Misalnya konfigurasi khusus, plugin lain yang terinstall, dll.
+      placeholder: "Saya menggunakan custom User model dengan kolom tambahan..."

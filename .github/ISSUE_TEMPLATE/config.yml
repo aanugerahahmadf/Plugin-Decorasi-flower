@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+
+contact_links:
+  - name: 📖 Dokumentasi
+    url: https://github.com/aanugerahahmadf/Plugin-Decorasi-flower#readme
+    about: Baca dokumentasi lengkap sebelum membuka issue.
+  - name: 💬 Diskusi
+    url: https://github.com/aanugerahahmadf/Plugin-Decorasi-flower/discussions
+    about: Tanya jawab umum dan diskusi komunitas.

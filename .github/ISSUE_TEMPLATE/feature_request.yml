@@ -1,0 +1,55 @@
+name: "✨ Feature Request"
+description: Usulkan fitur baru atau peningkatan untuk plugin Wedding Pro.
+title: "[Feature]: "
+labels: ["enhancement"]
+assignees: ["aanugerahahmadf"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ide bagus selalu disambut! 🎉 Ceritakan fitur yang ingin Anda lihat di Wedding Pro.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: "🤔 Masalah yang Ingin Diselesaikan"
+      description: Jelaskan masalah atau kebutuhan yang melatarbelakangi request ini.
+      placeholder: "Saya sering kesulitan ketika... / Saat ini tidak ada cara untuk..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: "💡 Solusi yang Diusulkan"
+      description: Bagaimana fitur ini seharusnya bekerja?
+      placeholder: "Tambahkan tombol export PDF di OrderResource yang menghasilkan invoice..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "🔄 Alternatif yang Sudah Dicoba"
+      description: Apakah ada solusi sementara yang sudah Anda coba?
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "📊 Prioritas"
+      options:
+        - "🔴 Critical — Memblokir penggunaan"
+        - "🟠 High — Sangat dibutuhkan"
+        - "🟡 Medium — Berguna tapi bisa ditunda"
+        - "🟢 Low — Nice to have"
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: "✔️ Checklist"
+      options:
+        - label: "Saya sudah mencari feature request serupa dan tidak menemukan duplikat."
+          required: true

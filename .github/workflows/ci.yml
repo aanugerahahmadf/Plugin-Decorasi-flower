@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
@@ -6,72 +6,72 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  # ─────────────────────────────────────────────
-  # JOB 1: Syntax Check (tanpa install deps)
-  # Cukup validasi semua file PHP bisa di-parse
-  # ─────────────────────────────────────────────
+  # ══════════════════════════════════════════════════════════════
+  # STAGE 1 — STATIC ANALYSIS (no deps needed)
+  # ══════════════════════════════════════════════════════════════
+
   syntax:
     runs-on: ubuntu-latest
-    name: PHP Syntax Check
-
+    name: "🔍 PHP Syntax"
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup PHP 8.3
-        uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@v2
         with:
           php-version: 8.3
           coverage: none
 
-      - name: Check PHP Syntax (src/)
+      - name: Check src/
         run: find src -name "*.php" -print0 | xargs -0 -n1 php -l
 
-      - name: Check PHP Syntax (database/)
+      - name: Check database/
         run: find database -name "*.php" -print0 | xargs -0 -n1 php -l
 
-  # ─────────────────────────────────────────────
-  # JOB 2: Composer validate
-  # Pastikan composer.json valid secara struktur
-  # ─────────────────────────────────────────────
+      - name: Check config/
+        run: find config -name "*.php" -print0 | xargs -0 -n1 php -l
+
+      - name: Check tests/
+        run: find tests -name "*.php" -print0 | xargs -0 -n1 php -l
+
   validate:
     runs-on: ubuntu-latest
-    name: Validate composer.json
-
+    name: "📋 Validate composer.json"
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup PHP 8.3
-        uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@v2
         with:
           php-version: 8.3
           tools: composer:v2
 
-      - name: Validate composer.json
+      - name: Validate structure
         run: composer validate --strict --no-check-publish
 
-  # ─────────────────────────────────────────────
-  # JOB 3: Install dengan Filament 3.x (PHP 8.2)
-  # tomatophp/filament-language-switcher ^1.0
-  # hanya kompatibel dengan Filament 3.x
-  # ─────────────────────────────────────────────
-  install-filament3:
+      - name: Check for security advisories
+        run: composer audit --no-dev --format=plain || true
+
+  # ══════════════════════════════════════════════════════════════
+  # STAGE 2 — INSTALL & TEST (Filament 3.x + PHP 8.2)
+  # ══════════════════════════════════════════════════════════════
+
+  test-filament3:
     runs-on: ubuntu-latest
-    name: Install (Filament 3 + PHP 8.2)
+    name: "🧪 Test (Filament 3 · PHP 8.2)"
     needs: [syntax, validate]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup PHP 8.2
-        uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@v2
         with:
           php-version: 8.2
-          extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite, pdo_sqlite, bcmath, intl
-          coverage: none
+          extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite, pdo_sqlite, bcmath, intl, pcov
+          coverage: pcov
           tools: composer:v2
 
       - name: Cache Composer
@@ -81,7 +81,7 @@ jobs:
           key: composer-f3-php82-${{ hashFiles('**/composer.json') }}
           restore-keys: composer-f3-php82-
 
-      - name: Install with Filament 3.x
+      - name: Install dependencies
         run: |
           composer config audit.abandoned report
           composer update \
@@ -97,31 +97,134 @@ jobs:
         run: composer dump-autoload --optimize
 
       - name: Run Unit Tests
-        run: vendor/bin/pest tests/Unit --colors=always --no-coverage
+        run: |
+          vendor/bin/pest tests/Unit \
+            --colors=always \
+            --coverage-clover=coverage.xml \
+            --min=50
 
-  # ─────────────────────────────────────────────
-  # JOB 4: Auto-tag & Release on push to main
-  # ─────────────────────────────────────────────
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: coverage.xml
+          flags: filament3
+          fail_ci_if_error: false
+
+  # ══════════════════════════════════════════════════════════════
+  # STAGE 3 — CODE QUALITY
+  # ══════════════════════════════════════════════════════════════
+
+  lint:
+    runs-on: ubuntu-latest
+    name: "✨ Code Style (Pint)"
+    needs: [syntax, validate]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          tools: composer:v2
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-lint-${{ hashFiles('**/composer.json') }}
+
+      - name: Install dependencies
+        run: |
+          composer config audit.abandoned report
+          composer update \
+            --prefer-dist \
+            --no-interaction \
+            --no-progress \
+            --ignore-platform-req=ext-pcntl \
+            --ignore-platform-req=ext-posix \
+            --ignore-platform-req=ext-swoole \
+            --ignore-platform-req=php
+
+      - name: Run Pint (dry-run)
+        run: |
+          if [ -f vendor/bin/pint ]; then
+            vendor/bin/pint --test --ansi
+          else
+            echo "⚠️  Pint not installed, skipping."
+          fi
+
+  # ══════════════════════════════════════════════════════════════
+  # STAGE 4 — SECURITY SCAN
+  # ══════════════════════════════════════════════════════════════
+
+  security:
+    runs-on: ubuntu-latest
+    name: "🔒 Security Scan"
+    needs: [syntax, validate]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          tools: composer:v2
+
+      - name: Install dependencies (no-dev)
+        run: |
+          composer update \
+            --no-dev \
+            --prefer-dist \
+            --no-interaction \
+            --no-progress \
+            --ignore-platform-req=ext-pcntl \
+            --ignore-platform-req=ext-posix \
+            --ignore-platform-req=ext-swoole \
+            --ignore-platform-req=php
+
+      - name: Run security audit
+        run: composer audit --format=plain || true
+
+      - name: Check for hardcoded secrets
+        run: |
+          echo "Scanning for hardcoded secrets..."
+          if grep -rn \
+            --include="*.php" \
+            -E "(password|secret|api_key|private_key)\s*=\s*['\"][^'\"]{8,}['\"]" \
+            src/ config/ 2>/dev/null | \
+            grep -v "env(" | \
+            grep -v "config(" | \
+            grep -v "//"; then
+            echo "⚠️  Possible hardcoded secrets found above. Review before merging."
+          else
+            echo "✅ No hardcoded secrets detected."
+          fi
+
+  # ══════════════════════════════════════════════════════════════
+  # STAGE 5 — RELEASE (only on push to main, all stages pass)
+  # ══════════════════════════════════════════════════════════════
+
   release:
     runs-on: ubuntu-latest
-    name: Auto Release
-    needs: [syntax, validate]
+    name: "🚀 Auto Release"
+    needs: [test-filament3, lint, security]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     permissions:
       contents: write
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Get latest tag
         id: get_tag
         run: |
-          LATEST=$(git tag --sort=-v:refname | head -n1)
+          LATEST=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n1)
           echo "latest=${LATEST:-v0.0.0}" >> $GITHUB_OUTPUT
+          echo "Latest tag: ${LATEST:-v0.0.0}"
 
       - name: Bump patch version
         id: bump
@@ -134,13 +237,27 @@ jobs:
           NEW_PATCH=$((PATCH + 1))
           NEW_TAG="v${MAJOR}.${MINOR}.${NEW_PATCH}"
           echo "new_tag=${NEW_TAG}" >> $GITHUB_OUTPUT
+          echo "New tag: ${NEW_TAG}"
 
-      - name: Create & push new tag
+      - name: Create & push tag
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag ${{ steps.bump.outputs.new_tag }}
           git push origin ${{ steps.bump.outputs.new_tag }}
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV="${{ steps.get_tag.outputs.latest }}"
+          if [ "$PREV" = "v0.0.0" ]; then
+            LOG=$(git log --oneline --no-merges | head -20)
+          else
+            LOG=$(git log ${PREV}..HEAD --oneline --no-merges)
+          fi
+          echo "log<<EOF" >> $GITHUB_OUTPUT
+          echo "$LOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -148,16 +265,24 @@ jobs:
           tag_name: ${{ steps.bump.outputs.new_tag }}
           name: "Release ${{ steps.bump.outputs.new_tag }}"
           body: |
-            ## 🚀 Release ${{ steps.bump.outputs.new_tag }}
+            ## 🚀 Wedding Pro ${{ steps.bump.outputs.new_tag }}
 
-            Auto-generated release from commit `${{ github.sha }}`.
-
-            ### Changes
-            ${{ github.event.head_commit.message }}
-
-            ### Install
+            ### 📦 Install
             ```bash
             composer require aanugerah/wedding-pro
             ```
+
+            ### 🔧 Upgrade
+            ```bash
+            composer update aanugerah/wedding-pro
+            php artisan migrate
+            php artisan filament:assets
+            ```
+
+            ### 📝 Changes
+            ${{ steps.changelog.outputs.log }}
+
+            ---
+            **Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ steps.get_tag.outputs.latest }}...${{ steps.bump.outputs.new_tag }}
           draft: false
           prerelease: false

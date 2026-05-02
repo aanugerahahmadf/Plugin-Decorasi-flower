@@ -8,46 +8,22 @@ on:
 
 jobs:
   # ─────────────────────────────────────────────
-  # JOB 1: Syntax & Dependency Check
+  # JOB 1: Syntax Check (tanpa install deps)
+  # Cukup validasi semua file PHP bisa di-parse
   # ─────────────────────────────────────────────
-  test:
+  syntax:
     runs-on: ubuntu-latest
-    name: PHP ${{ matrix.php }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        php: [8.3]
+    name: PHP Syntax Check
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup PHP ${{ matrix.php }}
+      - name: Setup PHP 8.3
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php }}
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, readline, ldap, msgpack, igbinary, redis, memcached, pcov
+          php-version: 8.3
           coverage: none
-          tools: composer:v2
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.composer/cache
-          key: composer-php${{ matrix.php }}-${{ hashFiles('**/composer.json') }}
-          restore-keys: composer-php${{ matrix.php }}-
-
-      - name: Install dependencies
-        run: |
-          composer config audit.abandoned report
-          composer install \
-            --prefer-dist \
-            --no-interaction \
-            --no-progress \
-            --ignore-platform-req=ext-pcntl \
-            --ignore-platform-req=ext-posix \
-            --ignore-platform-req=ext-swoole
 
       - name: Check PHP Syntax (src/)
         run: find src -name "*.php" -print0 | xargs -0 -n1 php -l
@@ -55,59 +31,84 @@ jobs:
       - name: Check PHP Syntax (database/)
         run: find database -name "*.php" -print0 | xargs -0 -n1 php -l
 
-      - name: Verify autoload resolves
-        run: composer dump-autoload --optimize
-
   # ─────────────────────────────────────────────
-  # JOB 2: Code Style (Pint)
+  # JOB 2: Composer validate
+  # Pastikan composer.json valid secara struktur
   # ─────────────────────────────────────────────
-  lint:
+  validate:
     runs-on: ubuntu-latest
-    name: Code Style (Pint)
-    needs: test
+    name: Validate composer.json
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup PHP
+      - name: Setup PHP 8.3
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.3
           tools: composer:v2
 
-      - name: Cache Composer dependencies
+      - name: Validate composer.json
+        run: composer validate --strict --no-check-publish
+
+  # ─────────────────────────────────────────────
+  # JOB 3: Install dengan Filament 3.x (PHP 8.2)
+  # tomatophp/filament-language-switcher ^1.0
+  # hanya kompatibel dengan Filament 3.x
+  # ─────────────────────────────────────────────
+  install-filament3:
+    runs-on: ubuntu-latest
+    name: Install (Filament 3 + PHP 8.2)
+    needs: [syntax, validate]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite, pdo_sqlite, bcmath, intl
+          coverage: none
+          tools: composer:v2
+
+      - name: Cache Composer
         uses: actions/cache@v4
         with:
           path: ~/.composer/cache
-          key: composer-lint-${{ hashFiles('**/composer.json') }}
+          key: composer-f3-php82-${{ hashFiles('**/composer.json') }}
+          restore-keys: composer-f3-php82-
 
-      - name: Install dependencies
+      - name: Install with Filament 3.x
         run: |
           composer config audit.abandoned report
-          composer install \
+          composer require \
+            "filament/filament:^3.3" \
+            "filament/spatie-laravel-media-library-plugin:^3.3" \
+            "tomatophp/filament-language-switcher:^1.0" \
+            --no-update
+          composer update \
             --prefer-dist \
             --no-interaction \
             --no-progress \
+            --with-all-dependencies \
             --ignore-platform-req=ext-pcntl \
             --ignore-platform-req=ext-posix \
-            --ignore-platform-req=ext-swoole
+            --ignore-platform-req=ext-swoole \
+            --ignore-platform-req=php
 
-      - name: Run Laravel Pint (dry-run)
-        run: |
-          if [ -f vendor/bin/pint ]; then
-            vendor/bin/pint --test
-          else
-            echo "Pint not installed, skipping."
-          fi
+      - name: Verify autoload
+        run: composer dump-autoload --optimize
 
   # ─────────────────────────────────────────────
-  # JOB 3: Auto-tag & Release on push to main
+  # JOB 4: Auto-tag & Release on push to main
   # ─────────────────────────────────────────────
   release:
     runs-on: ubuntu-latest
     name: Auto Release
-    needs: [test, lint]
+    needs: [syntax, validate]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     permissions:

@@ -21,7 +21,6 @@ use Aanugerah\WeddingPro\Models\Article;
 use Aanugerah\WeddingPro\Services\CBIRService;
 use Aanugerah\WeddingPro\Services\ChatService;
 use Aanugerah\WeddingPro\Services\MidtransService;
-use emmanpbarrameda\FilamentTakePictureField\Forms\Components\TakePicture;
 use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Infolists;
@@ -172,7 +171,7 @@ class PackageResource extends Resource
 
                         Forms\Components\Grid::make(1)
                             ->schema([
-                                TakePicture::make('camera_image')
+                                static::makeCameraField('camera_image')
                                     ->hiddenLabel()
                                     ->visible(fn (Forms\Get $get) => $get('show_camera'))
                                     ->live()
@@ -748,6 +747,22 @@ class PackageResource extends Resource
                             ->extraAttributes(['class' => 'italic opacity-80 mt-2']),
                     ])->compact(),
             ]);
+    }
+
+    /**
+     * Buat camera field — pakai TakePicture jika package terinstall,
+     * fallback ke FileUpload biasa jika tidak (Filament 3.x compatibility).
+     */
+    protected static function makeCameraField(string $name): Forms\Components\Field
+    {
+        if (class_exists(\emmanpbarrameda\FilamentTakePictureField\Forms\Components\TakePicture::class)) {
+            return \emmanpbarrameda\FilamentTakePictureField\Forms\Components\TakePicture::make($name);
+        }
+
+        return Forms\Components\FileUpload::make($name)
+            ->image()
+            ->directory('cbir-camera')
+            ->disk('public');
     }
 
     public static function getPages(): array

@@ -20,8 +20,10 @@
         "nativephp/laravel": "^1.3",
         "nativephp/mobile": "^3.1",
         "tomatophp/filament-language-switcher": "^1.0",
-        "dotswan/filament-map-picker": "^1.8",
-        "emmanpbarrameda/filament-take-picture-field": "^1.3"
+        "dotswan/filament-map-picker": "^1.8"
+    },
+    "suggest": {
+        "emmanpbarrameda/filament-take-picture-field": "Required for camera capture in PackageResource and ProductResource visual search (Filament 4+ only). Install with: composer require emmanpbarrameda/filament-take-picture-field:^1.3"
     },
     "require-dev": {
         "pestphp/pest": "^2.0",

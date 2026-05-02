@@ -84,16 +84,10 @@ jobs:
       - name: Install with Filament 3.x
         run: |
           composer config audit.abandoned report
-          composer require \
-            "filament/filament:^3.3" \
-            "filament/spatie-laravel-media-library-plugin:^3.3" \
-            "tomatophp/filament-language-switcher:^1.0" \
-            --no-update
           composer update \
             --prefer-dist \
             --no-interaction \
             --no-progress \
-            --with-all-dependencies \
             --ignore-platform-req=ext-pcntl \
             --ignore-platform-req=ext-posix \
             --ignore-platform-req=ext-swoole \

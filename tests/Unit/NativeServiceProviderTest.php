@@ -3,7 +3,7 @@
 namespace Aanugerah\WeddingPro\Tests\Unit;
 
 use Aanugerah\WeddingPro\NativeServiceProvider;
-use PHPUnit\Framework\TestCase;
+use Orchestra\Testbench\TestCase;
 use ReflectionClass;
 
 class NativeServiceProviderTest extends TestCase
@@ -22,15 +22,8 @@ class NativeServiceProviderTest extends TestCase
 
     private function resetStaticCache(): void
     {
-        $ref = new ReflectionClass(NativeServiceProvider::class);
-
-        $result = $ref->getProperty('result');
-        $result->setAccessible(true);
-        $result->setValue(null, null);
-
-        $ip = $ref->getProperty('ip');
-        $ip->setAccessible(true);
-        $ip->setValue(null, null);
+        NativeServiceProvider::$result = null;
+        NativeServiceProvider::$ip = null;
     }
 
     // ── isNativeMobile() ──────────────────────────────────────────────────

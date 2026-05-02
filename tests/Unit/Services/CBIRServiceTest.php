@@ -1,180 +1,200 @@
 <?php
 
+namespace Aanugerah\WeddingPro\Tests\Unit\Services;
+
 use Aanugerah\WeddingPro\Services\CBIRService;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
+use Mockery;
+use Orchestra\Testbench\TestCase;
 
-beforeEach(function () {
-    config(['services.ai_core_url' => 'http://127.0.0.1:5000']);
-    config(['services.ai_core_timeout' => 15]);
-    Cache::flush();
-});
+class CBIRServiceTest extends TestCase
+{
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-// ── errorResponse() ───────────────────────────────────────────────────────
+        config(['services.ai_core_url' => 'http://127.0.0.1:5000']);
+        config(['services.ai_core_timeout' => 15]);
+        Cache::flush();
+    }
 
-it('errorResponse returns correct structure', function () {
-    $service = new CBIRService();
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
+    }
 
-    $reflection = new ReflectionMethod(CBIRService::class, 'errorResponse');
-    $reflection->setAccessible(true);
+    // ── errorResponse() ───────────────────────────────────────────────────────
 
-    $result = $reflection->invoke($service, 'Server offline');
+    public function test_error_response_returns_correct_structure(): void
+    {
+        $service = new CBIRService();
 
-    expect($result)->toMatchArray([
-        'success' => false,
-        'error' => true,
-        'message' => 'Server offline',
-        'results' => [],
-        'query_time_seconds' => 0,
-    ]);
-});
+        $reflection = new \ReflectionMethod(CBIRService::class, 'errorResponse');
+        $reflection->setAccessible(true);
 
-// ── searchByImage() ───────────────────────────────────────────────────────
+        $result = $reflection->invoke($service, 'Server offline');
 
-it('searchByImage returns error response when AI server is offline', function () {
-    Http::fake([
-        'http://127.0.0.1:5000/*' => Http::response(null, 500),
-    ]);
+        $this->assertSame(false, $result['success']);
+        $this->assertSame(true, $result['error']);
+        $this->assertSame('Server offline', $result['message']);
+        $this->assertSame([], $result['results']);
+        $this->assertSame(0, $result['query_time_seconds']);
+    }
 
-    // Buat temp file untuk simulasi upload
-    $tmpFile = tempnam(sys_get_temp_dir(), 'cbir_test_');
-    file_put_contents($tmpFile, 'fake-image-content');
+    // ── searchByImage() ───────────────────────────────────────────────────────
 
-    $file = new \Symfony\Component\HttpFoundation\File\File($tmpFile);
+    public function test_search_by_image_returns_error_response_when_ai_server_is_offline(): void
+    {
+        Http::fake([
+            'http://127.0.0.1:5000/*' => Http::response(null, 500),
+        ]);
 
-    $service = new CBIRService();
-    $result = $service->searchByImage($file, 10);
+        $tmpFile = tempnam(sys_get_temp_dir(), 'cbir_test_');
+        file_put_contents($tmpFile, 'fake-image-content');
+        $file = new \Symfony\Component\HttpFoundation\File\File($tmpFile);
 
-    expect($result['success'])->toBeFalse();
-    expect($result['error'])->toBeTrue();
-    expect($result['results'])->toBeArray()->toBeEmpty();
+        $service = new CBIRService();
+        $result = $service->searchByImage($file, 10);
 
-    unlink($tmpFile);
-});
+        $this->assertFalse($result['success']);
+        $this->assertTrue($result['error']);
+        $this->assertIsArray($result['results']);
+        $this->assertEmpty($result['results']);
 
-it('searchByImage returns normalized results on success', function () {
-    Http::fake([
-        'http://127.0.0.1:5000/api/search' => Http::response([
-            'success' => true,
-            'results' => [
-                [
-                    'owner_id' => 1,
-                    'type' => 'package',
-                    'score' => 0.95,
-                    'similarity' => 95.0,
-                    'image_url' => 'http://example.com/img.jpg',
+        unlink($tmpFile);
+    }
+
+    public function test_search_by_image_returns_normalized_results_on_success(): void
+    {
+        Http::fake([
+            'http://127.0.0.1:5000/api/search' => Http::response([
+                'success' => true,
+                'results' => [
+                    [
+                        'owner_id'   => 1,
+                        'type'       => 'package',
+                        'score'      => 0.95,
+                        'similarity' => 95.0,
+                        'image_url'  => 'http://example.com/img.jpg',
+                    ],
+                    [
+                        'owner_id'   => 2,
+                        'type'       => 'product',
+                        'score'      => 0.80,
+                        'similarity' => 80.0,
+                        'image_url'  => null,
+                    ],
                 ],
-                [
-                    'owner_id' => 2,
-                    'type' => 'product',
-                    'score' => 0.80,
-                    'similarity' => 80.0,
-                    'image_url' => null,
+                'query_time_seconds' => 1.48,
+            ], 200),
+        ]);
+
+        $tmpFile = tempnam(sys_get_temp_dir(), 'cbir_test_');
+        file_put_contents($tmpFile, 'fake-image-content');
+        $file = new \Symfony\Component\HttpFoundation\File\File($tmpFile);
+
+        $service = new CBIRService();
+        $result = $service->searchByImage($file, 10);
+
+        $this->assertTrue($result['success']);
+        $this->assertCount(2, $result['results']);
+        $this->assertSame(1, $result['results'][0]['owner_id']);
+        $this->assertSame('package', $result['results'][0]['type']);
+        $this->assertSame(95.0, $result['results'][0]['similarity']);
+        $this->assertSame(1.48, $result['query_time_seconds']);
+
+        unlink($tmpFile);
+    }
+
+    public function test_search_by_image_filters_out_results_without_owner_id(): void
+    {
+        Http::fake([
+            'http://127.0.0.1:5000/api/search' => Http::response([
+                'success' => true,
+                'results' => [
+                    ['owner_id' => 1, 'type' => 'package', 'score' => 0.9, 'similarity' => 90.0],
+                    ['type' => 'product', 'score' => 0.5], // no owner_id — harus difilter
                 ],
-            ],
-            'query_time_seconds' => 1.48,
-        ], 200),
-    ]);
+                'query_time_seconds' => 0.5,
+            ], 200),
+        ]);
 
-    $tmpFile = tempnam(sys_get_temp_dir(), 'cbir_test_');
-    file_put_contents($tmpFile, 'fake-image-content');
-    $file = new \Symfony\Component\HttpFoundation\File\File($tmpFile);
+        $tmpFile = tempnam(sys_get_temp_dir(), 'cbir_test_');
+        file_put_contents($tmpFile, 'fake-image-content');
+        $file = new \Symfony\Component\HttpFoundation\File\File($tmpFile);
 
-    $service = new CBIRService();
-    $result = $service->searchByImage($file, 10);
+        $service = new CBIRService();
+        $result = $service->searchByImage($file, 10);
 
-    expect($result['success'])->toBeTrue();
-    expect($result['results'])->toHaveCount(2);
-    expect($result['results'][0]['owner_id'])->toBe(1);
-    expect($result['results'][0]['type'])->toBe('package');
-    expect($result['results'][0]['similarity'])->toBe(95.0);
-    expect($result['query_time_seconds'])->toBe(1.48);
+        $this->assertCount(1, $result['results']);
+        $this->assertSame(1, $result['results'][0]['owner_id']);
 
-    unlink($tmpFile);
-});
+        unlink($tmpFile);
+    }
 
-it('searchByImage filters out results without owner_id', function () {
-    Http::fake([
-        'http://127.0.0.1:5000/api/search' => Http::response([
-            'success' => true,
-            'results' => [
-                ['owner_id' => 1, 'type' => 'package', 'score' => 0.9, 'similarity' => 90.0],
-                ['type' => 'product', 'score' => 0.5], // no owner_id — harus difilter
-            ],
-            'query_time_seconds' => 0.5,
-        ], 200),
-    ]);
+    public function test_search_by_image_caps_top_k_to_maximum_50(): void
+    {
+        Http::fake([
+            'http://127.0.0.1:5000/api/search' => Http::response([
+                'success'            => true,
+                'results'            => [],
+                'query_time_seconds' => 0,
+            ], 200),
+        ]);
 
-    $tmpFile = tempnam(sys_get_temp_dir(), 'cbir_test_');
-    file_put_contents($tmpFile, 'fake-image-content');
-    $file = new \Symfony\Component\HttpFoundation\File\File($tmpFile);
+        $tmpFile = tempnam(sys_get_temp_dir(), 'cbir_test_');
+        file_put_contents($tmpFile, 'fake-image-content');
+        $file = new \Symfony\Component\HttpFoundation\File\File($tmpFile);
 
-    $service = new CBIRService();
-    $result = $service->searchByImage($file, 10);
+        $service = new CBIRService();
+        // top_k = 999 harus di-cap ke 50
+        $result = $service->searchByImage($file, 999);
 
-    expect($result['results'])->toHaveCount(1);
-    expect($result['results'][0]['owner_id'])->toBe(1);
+        $this->assertTrue($result['success']);
 
-    unlink($tmpFile);
-});
+        unlink($tmpFile);
+    }
 
-it('searchByImage caps top_k to maximum 50', function () {
-    Http::fake([
-        'http://127.0.0.1:5000/api/search' => Http::response([
-            'success' => true,
-            'results' => [],
-            'query_time_seconds' => 0,
-        ], 200),
-    ]);
+    // ── indexMedia() ──────────────────────────────────────────────────────────
 
-    $tmpFile = tempnam(sys_get_temp_dir(), 'cbir_test_');
-    file_put_contents($tmpFile, 'fake-image-content');
-    $file = new \Symfony\Component\HttpFoundation\File\File($tmpFile);
+    public function test_index_media_returns_false_when_ai_server_fails(): void
+    {
+        Http::fake([
+            'http://127.0.0.1:5000/api/index/add' => Http::response(null, 500),
+        ]);
 
-    $service = new CBIRService();
-    // top_k = 999 harus di-cap ke 50
-    $result = $service->searchByImage($file, 999);
+        $media = Mockery::mock(\Spatie\MediaLibrary\MediaCollections\Models\Media::class);
+        $media->shouldReceive('getPath')->andReturn('/tmp/fake.jpg');
+        $media->shouldReceive('getUrl')->andReturn('http://example.com/fake.jpg');
+        $media->model_type = \Aanugerah\WeddingPro\Models\Package::class;
+        $media->model_id   = 1;
+        $media->id         = 99;
 
-    expect($result['success'])->toBeTrue();
+        $service = new CBIRService();
+        $this->assertFalse($service->indexMedia($media));
+    }
 
-    unlink($tmpFile);
-});
+    public function test_index_media_returns_true_on_success_and_increments_cache_version(): void
+    {
+        Http::fake([
+            'http://127.0.0.1:5000/api/index/add' => Http::response(['success' => true], 200),
+        ]);
 
-// ── indexMedia() ──────────────────────────────────────────────────────────
+        Cache::put('cbir_cache_version', 1);
 
-it('indexMedia returns false when AI server fails', function () {
-    Http::fake([
-        'http://127.0.0.1:5000/api/index/add' => Http::response(null, 500),
-    ]);
+        $media = Mockery::mock(\Spatie\MediaLibrary\MediaCollections\Models\Media::class);
+        $media->shouldReceive('getPath')->andReturn('/tmp/fake.jpg');
+        $media->shouldReceive('getUrl')->andReturn('http://example.com/fake.jpg');
+        $media->model_type = \Aanugerah\WeddingPro\Models\Package::class;
+        $media->model_id   = 1;
+        $media->id         = 99;
 
-    $media = Mockery::mock(\Spatie\MediaLibrary\MediaCollections\Models\Media::class);
-    $media->shouldReceive('getPath')->andReturn('/tmp/fake.jpg');
-    $media->shouldReceive('getUrl')->andReturn('http://example.com/fake.jpg');
-    $media->model_type = \Aanugerah\WeddingPro\Models\Package::class;
-    $media->model_id = 1;
-    $media->id = 99;
+        $service = new CBIRService();
+        $result = $service->indexMedia($media);
 
-    $service = new CBIRService();
-    expect($service->indexMedia($media))->toBeFalse();
-});
-
-it('indexMedia returns true on success and increments cache version', function () {
-    Http::fake([
-        'http://127.0.0.1:5000/api/index/add' => Http::response(['success' => true], 200),
-    ]);
-
-    Cache::put('cbir_cache_version', 1);
-
-    $media = Mockery::mock(\Spatie\MediaLibrary\MediaCollections\Models\Media::class);
-    $media->shouldReceive('getPath')->andReturn('/tmp/fake.jpg');
-    $media->shouldReceive('getUrl')->andReturn('http://example.com/fake.jpg');
-    $media->model_type = \Aanugerah\WeddingPro\Models\Package::class;
-    $media->model_id = 1;
-    $media->id = 99;
-
-    $service = new CBIRService();
-    $result = $service->indexMedia($media);
-
-    expect($result)->toBeTrue();
-    expect(Cache::get('cbir_cache_version'))->toBe(2);
-});
+        $this->assertTrue($result);
+        $this->assertSame(2, Cache::get('cbir_cache_version'));
+    }
+}

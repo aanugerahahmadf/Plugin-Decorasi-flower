@@ -30,18 +30,18 @@ class WeddingOrganizerTest extends TestCase
         $this->assertSame('Bandung, Jawa Barat', $wo->city);
     }
 
-    public function test_returns_last_two_parts_for_long_address(): void
+    public function test_returns_last_part_for_long_address(): void
     {
         $wo = new WeddingOrganizer();
         $wo->address = 'Jl. Sudirman No. 1, Menteng, Jakarta Pusat, DKI Jakarta, Indonesia';
-        $this->assertSame('Jakarta Pusat, DKI Jakarta', $wo->city);
+        $this->assertSame('DKI Jakarta', $wo->city);
     }
 
     public function test_strips_indonesia_suffix(): void
     {
         $wo = new WeddingOrganizer();
         $wo->address = 'Kota Surabaya, Jawa Timur, Indonesia';
-        $this->assertSame('Kota Surabaya, Jawa Timur', $wo->city);
+        $this->assertSame('Jawa Timur', $wo->city);
     }
 
     public function test_returns_unknown_for_empty_address(): void

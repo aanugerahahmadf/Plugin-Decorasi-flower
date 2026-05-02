@@ -222,8 +222,8 @@ class WeddingOrganizer extends Model implements HasMedia
             array_pop($parts);
         }
 
-        // Ambil 2 bagian terakhir: "Kota, Provinsi"
-        $relevant = array_slice($parts, -2);
+        // Ambil 1 bagian terakhir: "Provinsi/Daerah"
+        $relevant = array_slice($parts, -1);
 
         return implode(', ', $relevant) ?: 'Unknown';
     }

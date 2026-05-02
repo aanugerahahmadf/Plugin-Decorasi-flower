@@ -177,7 +177,7 @@ class CBIRController extends Controller
     public function getStats(CBIRService $cbirService)
     {
         try {
-            $baseUrl = config('services.ai_core_url', 'http://127.0.0.1:5000');
+            $baseUrl = config('wedding-pro.ai_core_url', 'http://127.0.0.1:5000');
             $response = Http::get("{$baseUrl}/status");
 
             if ($response->successful()) {

@@ -16,7 +16,7 @@ class LanguageController extends Controller
      */
     public function switch(Request $request, string $locale): RedirectResponse
     {
-        $locals = config('filament-language-switcher.locals', []);
+        $locals = config('wedding-pro.locales', []);
 
         if (array_key_exists($locale, $locals)) {
             // 1. Core State Update

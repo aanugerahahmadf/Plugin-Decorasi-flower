@@ -17,8 +17,8 @@ class CBIRService
 
     public function __construct()
     {
-        $this->baseUrl = rtrim((string) config('services.ai_core_url', 'http://127.0.0.1:5000'), '/');
-        $this->timeoutSeconds = (int) config('services.ai_core_timeout', 15);
+        $this->baseUrl = rtrim((string) config('wedding-pro.ai_core_url', 'http://127.0.0.1:5000'), '/');
+        $this->timeoutSeconds = (int) config('wedding-pro.ai_core_timeout', 15);
     }
 
     public function searchByImage($imageFile, $topK = 10): array

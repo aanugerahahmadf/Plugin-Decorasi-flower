@@ -193,8 +193,8 @@ class AutoTranslationService
     protected function shouldIgnore(string $text): bool
     {
         if ($this->ignoredLabels === null) {
-            $this->ignoredLabels = collect(config('filament-language-switcher.locals', []))
-                ->pluck('label')
+            $this->ignoredLabels = collect(config('wedding-pro.locales', ['id' => 'Indonesian', 'en' => 'English']))
+                ->map(fn ($label) => is_array($label) ? ($label['label'] ?? '') : (string) $label)
                 ->map(fn ($l) => trim($l))
                 ->toArray();
 

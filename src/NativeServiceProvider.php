@@ -236,8 +236,8 @@ class NativeServiceProvider extends ServiceProvider
 
             // AI / CBIR Service Synchronization
             // Optimization: Web/Native should use 127.0.0.1, Mobile Emulator should use $hostIp
-            'services.ai_core_url' => $isMobile ? str_replace(['127.0.0.1', 'localhost'], $hostIp, env('AI_CORE_URL', 'http://127.0.0.1:5000')) : env('AI_CORE_URL', 'http://127.0.0.1:5000'),
-            'services.cbir_api_url' => $isMobile ? str_replace(['127.0.0.1', 'localhost'], $hostIp, env('CBIR_API_URL', 'http://127.0.0.1:5000')) : env('CBIR_API_URL', 'http://127.0.0.1:5000'),
+            'wedding-pro.ai_core_url' => $isMobile ? str_replace(['127.0.0.1', 'localhost'], $hostIp, env('AI_CORE_URL', 'http://127.0.0.1:5000')) : env('AI_CORE_URL', 'http://127.0.0.1:5000'),
+            'wedding-pro.cbir_api_url' => $isMobile ? str_replace(['127.0.0.1', 'localhost'], $hostIp, env('CBIR_API_URL', 'http://127.0.0.1:5000')) : env('CBIR_API_URL', 'http://127.0.0.1:5000'),
         ];
 
         $proxyUrl = "{$hostServerUrl}/api/db-proxy";

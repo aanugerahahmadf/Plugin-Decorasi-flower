@@ -75,7 +75,7 @@ class SetLocale
             if (\Aanugerah\WeddingPro\NativeServiceProvider::isNativeMobile()) {
                 $locale = 'id';
             } else {
-                $localsConfig = config('filament-language-switcher.locals', ['id' => [], 'en' => []]);
+                $localsConfig = config('wedding-pro.locales', ['id' => 'Indonesian', 'en' => 'English']);
                 $supported = array_keys($localsConfig);
                 $locale = $request->getPreferredLanguage($supported ?: ['id', 'en']);
             }

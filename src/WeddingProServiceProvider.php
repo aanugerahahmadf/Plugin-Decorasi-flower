@@ -21,6 +21,7 @@ class WeddingProServiceProvider extends PackageServiceProvider
             ->name('wedding-pro')
             ->hasViews()
             ->hasTranslations()
+            ->hasConfigFile(['midtrans', 'wedding-pro'])
             ->hasMigrations([
                 '0001_01_01_000000_create_users_table',
                 '2024_10_23_010712_create_user_languages_table',

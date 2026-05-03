@@ -4,7 +4,7 @@
 
 [![Packagist Version](https://img.shields.io/packagist/v/aanugerah/wedding-pro)](https://packagist.org/packages/aanugerah/wedding-pro)
 [![PHP Version](https://img.shields.io/badge/php-%5E8.2-blue)](https://packagist.org/packages/aanugerah/wedding-pro)
-[![Laravel Version](https://img.shields.io/badge/laravel-%5E11.0-red)](https://laravel.com)
+[![Laravel Version](https://img.shields.io/badge/laravel-%5E11.0%20%7C%7C%20%5E12.0%20%7C%7C%20%5E13.0-red)](https://laravel.com)
 [![Filament Version](https://img.shields.io/badge/filament-%5E3.3%20%7C%7C%20%5E4.0-orange)](https://filamentphp.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
@@ -66,8 +66,8 @@ Sistem lokalisasi pintar yang mendobrak batasan bahasa.
 Pastikan environment Anda memenuhi spesifikasi berikut sebelum menginstal plugin:
 
 - **PHP**: `^8.2` atau lebih baru
-- **Laravel**: `^11.0`
-- **Filament**: `^3.3`
+- **Laravel**: `^11.0`, `^12.0`, atau `^13.0`
+- **Filament**: `^3.3` atau `^4.0`
 - **Ekstensi PHP**: `pdo`, `mbstring`, `intl`, `sqlite3` (untuk NativePHP), `exif` (untuk manipulasi gambar)
 - **Composer**: Versi 2.x
 

@@ -11,6 +11,8 @@
     ],
     "require": {
         "php": "^8.2",
+        "illuminate/contracts": "^11.0 || ^12.0 || ^13.0",
+        "illuminate/support": "^11.0 || ^12.0 || ^13.0",
         "filament/filament": "^3.3 || ^4.0",
         "filament/spatie-laravel-media-library-plugin": "^3.3 || ^4.0",
         "midtrans/midtrans-php": "^2.6",
@@ -26,9 +28,9 @@
         "emmanpbarrameda/filament-take-picture-field": "Required for camera capture in PackageResource and ProductResource visual search (Filament 4+ only). Install with: composer require emmanpbarrameda/filament-take-picture-field:^1.3"
     },
     "require-dev": {
-        "phpunit/phpunit": "^10.5",
+        "phpunit/phpunit": "^10.5 || ^11.0",
         "mockery/mockery": "^1.6",
-        "orchestra/testbench": "^9.0"
+        "orchestra/testbench": "^9.0 || ^10.0 || ^11.0"
     },
     "autoload": {
         "psr-4": {

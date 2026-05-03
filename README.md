@@ -6,7 +6,7 @@
 [![PHP Version](https://img.shields.io/badge/php-%5E8.2-blue)](https://packagist.org/packages/aanugerah/wedding-pro)
 [![Laravel Version](https://img.shields.io/badge/laravel-%5E11.0%20%7C%7C%20%5E12.0%20%7C%7C%20%5E13.0-red)](https://laravel.com)
 [![Filament Version](https://img.shields.io/badge/filament-%5E3.3%20%7C%7C%20%5E4.0%20%7C%7C%20%5E5.0-orange)](https://filamentphp.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
 ---
 
@@ -225,29 +225,25 @@ Seluruh *Pull Request* harus melewati proses CI (Continuous Integration) menggun
 
 ## 📄 Lisensi & Legal (Licensing)
 
-Perangkat lunak ini adalah sumber terbuka (Open-Source) dan dilisensikan di bawah pengawasan **[MIT License](https://opensource.org/licenses/MIT)**.
+Perangkat lunak ini adalah sumber terbuka (Open-Source) dan dilisensikan di bawah pengawasan **[Apache License 2.0](https://opensource.org/licenses/Apache-2.0)**.
 
 ### Hak Pengguna (What You Can Do)
-Berdasarkan MIT License, Anda diberikan kebebasan penuh tanpa batasan untuk:
-- Menggunakan plugin ini untuk proyek **pribadi** maupun **komersial** (digunakan untuk klien Anda).
-- **Memodifikasi** kode sumber sesuai dengan kebutuhan spesifik bisnis Anda.
-- **Mendistribusikan ulang** aplikasi yang di-build menggunakan kerangka kerja plugin ini.
-- Melakukan komersialisasi dan menjual produk turunan Anda secara legal.
+Berdasarkan Apache License 2.0, Anda diberikan kebebasan untuk:
+- **Komersial**: Menggunakan plugin ini untuk proyek komersial dan tujuan bisnis.
+- **Modifikasi**: Mengubah kode sumber untuk menyesuaikan dengan kebutuhan Anda.
+- **Distribusi**: Membagikan kode sumber asli atau yang telah dimodifikasi.
+- **Paten**: Menggunakan lisensi paten eksplisit yang diberikan oleh kontributor proyek ini (jika ada).
 
 ### Kewajiban Pengguna (Conditions)
-- Anda **wajib** menyertakan pemberitahuan hak cipta asli (*copyright notice*) dan salinan lisensi MIT ini di setiap salinan atau bagian substansial dari perangkat lunak.
+- **Pemberitahuan Lisensi**: Anda harus menyertakan salinan lisensi Apache 2.0 dan pemberitahuan hak cipta dalam setiap salinan perangkat lunak yang Anda distribusikan.
+- **Pemberitahuan Perubahan**: Jika Anda memodifikasi file *source code*, Anda wajib menyertakan pemberitahuan (notice) yang menyatakan bahwa Anda telah mengubah file tersebut.
+- **File NOTICE**: Anda dilarang menghapus atau mengubah file `NOTICE` (jika ada) dan harus menyertakannya saat didistribusikan ulang.
 
 ### Sanggahan Hukum (Disclaimer of Warranty & Limitation of Liability)
-> PERANGKAT LUNAK INI DISEDIAKAN "APA ADANYA" (AS IS), TANPA JAMINAN APA PUN, BAIK TERSURAT MAUPUN TERSIRAT, TERMASUK NAMUN TIDAK TERBATAS PADA JAMINAN KELAYAKAN JUAL, KESESUAIAN UNTUK TUJUAN TERTENTU, DAN KETIADAAN PELANGGARAN.
-> 
-> DALAM KEADAAN APA PUN, PENGARANG (AUTHOR) ATAU PEMEGANG HAK CIPTA TIDAK BERTANGGUNG JAWAB ATAS KLAIM, KERUSAKAN, ATAU KEWAJIBAN LAINNYA, BAIK DALAM TINDAKAN KONTRAK, PELANGGARAN, ATAU LAINNYA, YANG TIMBUL DARI, DI LUAR, ATAU SEHUBUNGAN DENGAN PERANGKAT LUNAK INI ATAU PENGGUNAAN ATAU TRANSAKSI LAIN DALAM PERANGKAT LUNAK INI. PENGGUNAAN KODE INI BERADA SEPENUHNYA DI BAWAH RISIKO PENGGUNA.
+> PERANGKAT LUNAK INI DISEDIAKAN "APA ADANYA" (AS IS), TANPA JAMINAN APA PUN. PENGARANG (AUTHOR) TIDAK BERTANGGUNG JAWAB ATAS KLAIM, KERUSAKAN, ATAU KEWAJIBAN LAINNYA.
 
 ### Lisensi Pihak Ketiga (Third-Party Licenses)
-Harap dicatat bahwa plugin ini mengimpor dan bergantung pada beberapa perpustakaan pihak ketiga (*dependencies*). Perpustakaan-perpustakaan tersebut tunduk pada lisensinya masing-masing (sebagian besar MIT). Dengan menggunakan plugin ini, Anda juga setuju untuk mematuhi lisensi dari pustaka pihak ketiga berikut:
-- **Laravel Framework** (MIT License)
-- **Filament PHP** (MIT License)
-- **Spatie Media Library** (MIT License)
-- **Midtrans PHP Client** (MIT License)
+Harap dicatat bahwa plugin ini mengimpor dan bergantung pada beberapa perpustakaan pihak ketiga (*dependencies*). Sebagian besar *library* pihak ketiga yang digunakan berlisensi **MIT License** (seperti Laravel, Filament, Spatie, dan Midtrans). Dengan menggunakan plugin ini, Anda juga setuju untuk mematuhi lisensi dari pustaka pihak ketiga tersebut.
 
 ---
 

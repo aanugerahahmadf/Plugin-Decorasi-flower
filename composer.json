@@ -2,7 +2,7 @@
     "name": "aanugerah/wedding-pro",
     "description": "A comprehensive Wedding Organizer management suite for Filament PHP with Native Mobile integration.",
     "type": "library",
-    "license": "MIT",
+    "license": "Apache-2.0",
     "authors": [
         {
             "name": "Anugerah Ahmad Fachrurochim",
